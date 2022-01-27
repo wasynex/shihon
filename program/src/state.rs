@@ -6,7 +6,7 @@ use solana_program::{
 
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
-pub struct Escrow {
+pub struct Tanistry {
     pub is_initialized: bool,
     pub initializer_pubkey: Pubkey,
     pub temp_token_account_pubkey: Pubkey,
@@ -14,18 +14,18 @@ pub struct Escrow {
     pub expected_amount: u64,
 }
 
-impl Sealed for Escrow {}
+impl Sealed for Tanistry {}
 
-impl IsInitialized for Escrow {
+impl IsInitialized for Tanistry {
     fn is_initialized(&self) -> bool {
         self.is_initialized
     }
 }
 
-impl Pack for Escrow {
+impl Pack for Tanistry {
     const LEN: usize = 105;
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
-        let src = array_ref![src, 0, Escrow::LEN];
+        let src = array_ref![src, 0, Tanistry::LEN];
         let (
             is_initialized,
             initializer_pubkey,
@@ -39,7 +39,7 @@ impl Pack for Escrow {
             _ => return Err(ProgramError::InvalidAccountData),
         };
 
-        Ok(Escrow {
+        Ok(Tanistry {
             is_initialized,
             initializer_pubkey: Pubkey::new_from_array(*initializer_pubkey),
             temp_token_account_pubkey: Pubkey::new_from_array(*temp_token_account_pubkey),
@@ -51,7 +51,7 @@ impl Pack for Escrow {
     }
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
-        let dst = array_mut_ref![dst, 0, Escrow::LEN];
+        let dst = array_mut_ref![dst, 0, Tanistry::LEN];
         let (
             is_initialized_dst,
             initializer_pubkey_dst,
@@ -60,7 +60,7 @@ impl Pack for Escrow {
             expected_amount_dst,
         ) = mut_array_refs![dst, 1, 32, 32, 32, 8];
 
-        let Escrow {
+        let Tanistry {
             is_initialized,
             initializer_pubkey,
             temp_token_account_pubkey,
