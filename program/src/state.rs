@@ -5,13 +5,16 @@ use solana_program::{
 };
 
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-
+/// TODO: wtire the Tanisstry's para
 pub struct Tanistry {
     pub is_initialized: bool,
-    pub initializer_pubkey: Pubkey,
+    pub kicker_pubkey: Pubkey,
     pub temp_token_account_pubkey: Pubkey,
-    pub initializer_token_to_receive_account_pubkey: Pubkey,
-    pub expected_amount: u64,
+    pub kicker_token_to_receive_account_pubkey: Pubkey,
+    // pub rating_list: [Rate],
+    // pub number_of_round: u64,
+    // pub mpc_key: Pubkey,
+    // pub building_key: Pubkey,
 }
 
 impl Sealed for Tanistry {}
@@ -74,5 +77,34 @@ impl Pack for Tanistry {
         initializer_token_to_receive_account_pubkey_dst
             .copy_from_slice(initializer_token_to_receive_account_pubkey.as_ref());
         *expected_amount_dst = expected_amount.to_le_bytes();
+    }
+}
+
+/// state for rating the content
+pub struct Rate {
+    pub is_initialized: bool,
+    pub content: Pubkey,
+    pub rater_pubkey: Pubkey,
+    pub temp_rating_account_pubkey: Pubkey,
+    pub rate_amount: u64,
+}
+
+impl Sealed for Rate {}
+
+impl IsInitialized for Rate {
+    fn is_initialized(&self) -> bool {
+        self.is_initialized
+    }
+}
+
+impl Pack for Rate {
+    const LEN: usize = 96;
+
+    fn pack_into_slice(&self, dst: &mut [u8]) {
+        unimplemented!();
+    }
+
+    fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
+        unimplemented!();
     }
 }
