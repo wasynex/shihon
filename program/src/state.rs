@@ -1,3 +1,4 @@
+use solana_program::clock::{Slot, UnixTimestamp};
 use solana_program::{
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack, Sealed},
@@ -5,6 +6,14 @@ use solana_program::{
 };
 
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
+
+pub struct BCToken {
+    pub is_initialized: bool,
+    pub number_of_issue: u64,
+    pub link_of_content: String,
+    pub issue_at: UnixTimestamp,
+    pub issuer_pubkey: Pubkey,
+}
 
 pub struct Tanistry {
     pub is_initialized: bool,
