@@ -22,7 +22,7 @@ For more Solana specifications, read
 
 - [Solana Document](https://docs.solana.com/)
 
-- [Solana Cockbook](https://solanacookbook.com/)
+- [Solana Cookbook](https://solanacookbook.com/)
 
 
 ## Release History
