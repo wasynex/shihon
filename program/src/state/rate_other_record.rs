@@ -11,39 +11,42 @@ use crate::{error::ShihonError, PROGRAM_AUTHORITY_SEED};
 
 use crate::state::enums::ShihonAccountType;
 
-/// Account PDA seeds: ['governance', proposal, signatory]
+/// Account PDA seeds: ['shihon', rate, signatory]
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct SignatoryRecord {
-    /// Governance account type
+pub struct RateOtherRecord {
+    ///
+    pub is_initialized: bool,
+
+    /// Rate account type
     pub account_type: ShihonAccountType,
 
-    /// Proposal the signatory is assigned for
-    pub proposal: Pubkey,
+    /// Rater's Pubkey
+    pub rater_pubkey: Pubkey,
 
-    /// The account of the signatory who can sign off the proposal
-    pub signatory: Pubkey,
+    /// Rated content
+    pub rated_content: Pubkey,
 
-    /// Indicates whether the signatory signed off the proposal
-    pub signed_off: bool,
+    ///
+    pub rate_amount: u64,
 }
 
-impl AccountMaxSize for SignatoryRecord {}
+impl AccountMaxSize for RateOtherRecord {}
 
-impl IsInitialized for SignatoryRecord {
+impl IsInitialized for RateOtherRecord {
     fn is_initialized(&self) -> bool {
-        self.account_type == ShihonAccountType::SignatoryRecord
+        self.account_type == ShihonAccountType::RateOtherRecord
     }
 }
 
-impl SignatoryRecord {
+impl RateOtherRecord {
     /// Checks signatory hasn't signed off yet and is transaction signer
-    pub fn assert_can_sign_off(&self, signatory_info: &AccountInfo) -> Result<(), ProgramError> {
-        if self.signed_off {
+    pub fn assert_can_rate(&self, rating_info: &AccountInfo) -> Result<(), ProgramError> {
+        if self.is_initialized {
             return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
-        if !signatory_info.is_signer {
+        if !rating_info.rater_pubkey {
             return Err(ShihonError::SignatoryMustSign.into());
         }
 
@@ -51,8 +54,8 @@ impl SignatoryRecord {
     }
 
     /// Checks signatory can be removed from Proposal
-    pub fn assert_can_remove_signatory(&self) -> Result<(), ProgramError> {
-        if self.signed_off {
+    pub fn assert_can_remove_rating(&self) -> Result<(), ProgramError> {
+        if self.is_initialized {
             return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
@@ -60,54 +63,54 @@ impl SignatoryRecord {
     }
 }
 
-/// Returns SignatoryRecord PDA seeds
-pub fn get_signatory_record_address_seeds<'a>(
-    proposal: &'a Pubkey,
-    signatory: &'a Pubkey,
+/// Returns RateOtherRecord PDA seeds
+pub fn get_rate_other_record_address_seeds<'a>(
+    rater_pubkey: &'a Pubkey,
+    rated_content: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     [
         PROGRAM_AUTHORITY_SEED,
-        proposal.as_ref(),
-        signatory.as_ref(),
+        rater_pubkey.as_ref(),
+        rated_content.as_ref(),
     ]
 }
 
-/// Returns SignatoryRecord PDA address
-pub fn get_signatory_record_address<'a>(
+/// Returns RateOtherRecord PDA address
+pub fn get_rate_other_record_address<'a>(
     program_id: &Pubkey,
-    proposal: &'a Pubkey,
-    signatory: &'a Pubkey,
+    rater_pubkey: &'a Pubkey,
+    rated_content: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_signatory_record_address_seeds(proposal, signatory),
+        &get_rate_other_record_address_seeds(rater_pubkey, rated_content),
         program_id,
     )
     .0
 }
 
-/// Deserializes SignatoryRecord account and checks owner program
-pub fn get_signatory_record_data(
+/// Deserializes RateOtherRecord account and checks owner program
+pub fn get_rate_other_record_data(
     program_id: &Pubkey,
-    signatory_record_info: &AccountInfo,
-) -> Result<SignatoryRecord, ProgramError> {
-    get_account_data::<SignatoryRecord>(program_id, signatory_record_info)
+    rate_other_record_info: &AccountInfo,
+) -> Result<RateOtherRecord, ProgramError> {
+    get_account_data::<RateOtherRecord>(program_id, rate_other_record_info)
 }
 
-/// Deserializes SignatoryRecord  and validates its PDA
-pub fn get_signatory_record_data_for_seeds(
+/// Deserializes RateOtherRecord  and validates its PDA
+pub fn get_rete_other_record_data_for_seeds(
     program_id: &Pubkey,
-    signatory_record_info: &AccountInfo,
-    proposal: &Pubkey,
-    signatory: &Pubkey,
-) -> Result<SignatoryRecord, ProgramError> {
-    let (signatory_record_address, _) = Pubkey::find_program_address(
-        &get_signatory_record_address_seeds(proposal, signatory),
+    rate_other_record_info: &AccountInfo,
+    rater_pubkey: &Pubkey,
+    rated_content: &Pubkey,
+) -> Result<RateOtherRecord, ProgramError> {
+    let (rate_other_record_address, _) = Pubkey::find_program_address(
+        &get_rate_other_record_address_seeds(rated_content, rater_pubkey),
         program_id,
     );
 
-    if signatory_record_address != *signatory_record_info.key {
+    if rate_other_record_address != *rate_other_record_info.key {
         return Err(ShihonError::InvalidSignatoryAddress.into());
     }
 
-    get_signatory_record_data(program_id, signatory_record_info)
+    get_rate_other_record_data(program_id, rate_other_record_info)
 }

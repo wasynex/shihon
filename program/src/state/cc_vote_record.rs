@@ -19,43 +19,39 @@ use crate::state::{
     legacy::{VoteRecordV1, VoteWeightV1},
 };
 
-/// Voter choice for a proposal option
-/// In the current version only 1) Single choice and 2) Multiple choices proposals are supported
-/// In the future versions we can add support for 1) Quadratic voting, 2) Ranked choice voting and 3) Weighted voting
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct VoteChoice {
-    /// The rank given to the choice by voter
-    /// Note: The filed is not used in the current version
-    pub rank: u8,
+pub struct CCVoteChoice {
+    /// which ring need to make CC
+    pub target_ring: Option<Pubkey>,
 
-    /// The voter's weight percentage given by the voter to the choice
-    pub weight_percentage: u8,
+    ///
+    pub challenger_ring: Option<Pubkey>,
 }
 
-impl VoteChoice {
-    /// Returns the choice weight given the voter's weight
-    pub fn get_choice_weight(&self, voter_weight: u64) -> Result<u64, ProgramError> {
-        Ok(match self.weight_percentage {
-            100 => voter_weight,
-            0 => 0,
-            _ => return Err(ShihonError::InvalidVoteChoiceWeightPercentage.into()),
-        })
-    }
-}
+// impl CCVoteChoice {
+//     /// Returns the choice weight given the voter's weight
+//     pub fn get_choice_weight(&self, voter_weight: u64) -> Result<u64, ProgramError> {
+//         Ok(match self.weight_percentage {
+//             100 => voter_weight,
+//             0 => 0,
+//             _ => return Err(ShihonError::InvalidVoteChoiceWeightPercentage.into()),
+//         })
+//     }
+// }
 
 /// User's vote
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum Vote {
-    /// Vote approving choices
-    Approve(Vec<VoteChoice>),
+    /// want to pull the other ring to make CC
+    Pull(Vec<CCVoteChoice>),
 
-    /// Vote rejecting proposal
-    Deny,
+    /// want to push
+    Push,
 }
 
 /// Proposal VoteRecord
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct VoteRecordV2 {
+pub struct CCVoteRecord {
     /// Governance account type
     pub account_type: ShihonAccountType,
 
@@ -76,14 +72,14 @@ pub struct VoteRecordV2 {
     pub vote: Vote,
 }
 
-impl AccountMaxSize for VoteRecordV2 {}
+impl AccountMaxSize for CCVoteRecord {}
 
-impl IsInitialized for VoteRecordV2 {
+impl IsInitialized for CCVoteRecord {
     fn is_initialized(&self) -> bool {
-        self.account_type == ShihonAccountType::VoteRecordV2
+        self.account_type == ShihonAccountType::CCVoteRecord
     }
 }
-impl VoteRecordV2 {
+impl CCVoteRecord {
     /// Checks the vote can be relinquished
     pub fn assert_can_relinquish_vote(&self) -> Result<(), ProgramError> {
         if self.is_relinquished {
@@ -95,13 +91,13 @@ impl VoteRecordV2 {
 
     /// Serializes account into the target buffer
     pub fn serialize<W: Write>(self, writer: &mut W) -> Result<(), ProgramError> {
-        if self.account_type == ShihonAccountType::VoteRecordV2 {
+        if self.account_type == ShihonAccountType::CCVoteRecord {
             BorshSerialize::serialize(&self, writer)?
         } else if self.account_type == ShihonAccountType::VoteRecordV1 {
             // V1 account can't be resized and we have to translate it back to the original format
             let vote_weight = match &self.vote {
-                Vote::Approve(_options) => VoteWeightV1::Yes(self.voter_weight),
-                Vote::Deny => VoteWeightV1::No(self.voter_weight),
+                Vote::Pull(_options) => VoteWeightV1::Yes(self.voter_weight),
+                Vote::Push => VoteWeightV1::No(self.voter_weight),
             };
 
             let vote_record_data_v1 = VoteRecordV1 {
@@ -120,10 +116,10 @@ impl VoteRecordV2 {
 }
 
 /// Deserializes VoteRecord account and checks owner program
-pub fn get_vote_record_data(
+pub fn get_cc_vote_record_data(
     program_id: &Pubkey,
     vote_record_info: &AccountInfo,
-) -> Result<VoteRecordV2, ProgramError> {
+) -> Result<CCVoteRecord, ProgramError> {
     let account_type: ShihonAccountType =
         try_from_slice_unchecked(&vote_record_info.data.borrow())?;
 
@@ -133,16 +129,16 @@ pub fn get_vote_record_data(
 
         let (vote, voter_weight) = match vote_record_data_v1.vote_weight {
             VoteWeightV1::Yes(weight) => (
-                Vote::Approve(vec![VoteChoice {
+                Vote::Pull(vec![CCVoteChoice {
                     rank: 0,
                     weight_percentage: 100,
                 }]),
                 weight,
             ),
-            VoteWeightV1::No(weight) => (Vote::Deny, weight),
+            VoteWeightV1::No(weight) => (Vote::Push, weight),
         };
 
-        return Ok(VoteRecordV2 {
+        return Ok(CCVoteRecord {
             account_type,
             proposal: vote_record_data_v1.proposal,
             governing_token_owner: vote_record_data_v1.governing_token_owner,
@@ -152,11 +148,11 @@ pub fn get_vote_record_data(
         });
     }
 
-    get_account_data::<VoteRecordV2>(program_id, vote_record_info)
+    get_account_data::<CCVoteRecord>(program_id, vote_record_info)
 }
 
-/// Deserializes VoteRecord and checks it belongs to the provided Proposal and Governing Token Owner
-pub fn get_vote_record_data_for_proposal_and_token_owner(
+/// Deserializes CCVoteRecord and
+pub fn get_cc_vote_record_data_for_challenger_ring_and_targeted_ring(
     program_id: &Pubkey,
     vote_record_info: &AccountInfo,
     proposal: &Pubkey,
@@ -175,8 +171,8 @@ pub fn get_vote_record_data_for_proposal_and_token_owner(
     Ok(vote_record_data)
 }
 
-/// Returns VoteRecord PDA seeds
-pub fn get_vote_record_address_seeds<'a>(
+/// Returns CCVoteRecord PDA seeds
+pub fn get_cc_vote_record_address_seeds<'a>(
     proposal: &'a Pubkey,
     token_owner_record: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
@@ -187,14 +183,14 @@ pub fn get_vote_record_address_seeds<'a>(
     ]
 }
 
-/// Returns VoteRecord PDA address
-pub fn get_vote_record_address<'a>(
+/// Returns CCVoteRecord PDA address
+pub fn get_cc_vote_record_address<'a>(
     program_id: &Pubkey,
     proposal: &'a Pubkey,
     token_owner_record: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_vote_record_address_seeds(proposal, token_owner_record),
+        &get_cc_vote_record_address_seeds(proposal, token_owner_record),
         program_id,
     )
     .0

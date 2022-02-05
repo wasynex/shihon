@@ -8,18 +8,17 @@ fn mk_building_hash() {
     unimplemented!();
 }
 
-fn mk_triple(candidate_list:[&Pubkey]) {
+fn mk_triple(candidate_list: Vec<Pubkey>) {
     unimplemented!();
 }
 
-fn get_triple(candidate:Pubkey) {
+fn get_triple(candidate: Pubkey) {
     unimplemented!();
 }
 
 fn get_my_buddy_candidate(me: Pubkey) -> Pubkey {
     unimplemented!();
 }
-
 
 /// for mixing the content to rate itself
 fn multi_sig_1() {
@@ -33,7 +32,6 @@ fn multi_sig_2() -> Pubkey {
 fn multi_sig_3() -> Pubkey {
     unimplemented!();
 }
-
 
 /// for move the address
 fn drop_address() {

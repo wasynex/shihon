@@ -1,4 +1,3 @@
-use crate::PROGRAM_AUTHORITY_SEED;
 use solana_program::clock::UnixTimestamp;
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
@@ -10,17 +9,40 @@ use spl_governance_tools::account::{assert_is_valid_account, get_account_data, A
 
 use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
 
+/// bcToken Account
+/// Account PDA seeds" ['shihon', name]
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct BcToken {
+
     pub is_initialized: bool,
     pub issuer_pubkey: Pubkey,
     pub number_of_issue: u64,
     pub link_of_content: String,
     pub issue_at: UnixTimestamp,
-    pub start_at: Option<UnixTimestamp>,
-    pub end_at: Option<UnixTimestamp>,
-    pub candidate_at: Option<UnixTimestamp>,
+    /// Governance account type
+    pub account_type: ShihonAccountType,
+
+    /// Community mint
+    pub community_mint: Pubkey,
+
+    /// Configuration of the Realm
+    pub config: BcTokenConfig,
+
+    /// Reserved space for future versions
+    pub reserved: [u8; 8],
+
+    /// Realm authority. The authority must sign transactions which update the realm config
+    /// The authority should be transferred to Realm Governance to make the Realm self governed through proposals
+    pub authority: Option<Pubkey>,
+
+    /// Governance Realm name
+    pub name: String,
+
     pub mpc_key: Option<u8>,
+
 }
+
 impl IsInitialized for BcToken {
     fn is_initialized(&self) -> bool {
         self.is_initialized
@@ -62,83 +84,20 @@ pub fn get_bc_token_holding_address(
     .0
 }
 
-/// bcToken Config instruction args
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct BcTokenConfigArgs {
-    /// Indicates whether council_mint should be used
-    /// If yes then council_mint account must also be passed to the instruction
-    pub use_council_mint: bool,
 
-    /// Min number of community tokens required to create a governance
-    pub min_community_tokens_to_create_governance: u64,
-
-    /// The source used for community mint max vote weight source
-    pub community_mint_max_vote_weight_source: MintMaxVoteWeightSource,
-
-    /// Indicates whether an external addin program should be used to provide community voters weights
-    /// If yes then the voters weight program account must be passed to the instruction
-    pub use_community_voter_weight_addin: bool,
-}
-
-/// Realm Config defining Realm parameters.
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct RealmConfig {
-    /// Indicates whether an external addin program should be used to provide voters weights for the community mint
-    pub use_community_voter_weight_addin: bool,
-
-    /// Reserved space for future versions
-    pub reserved: [u8; 7],
-
-    /// Min number of community tokens required to create a governance
-    pub min_community_tokens_to_create_governance: u64,
-
-    /// The source used for community mint max vote weight source
-    pub community_mint_max_vote_weight_source: MintMaxVoteWeightSource,
-
-    /// Optional council mint
-    pub council_mint: Option<Pubkey>,
-}
-
-/// Governance Realm Account
-/// Account PDA seeds" ['governance', name]
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct Realm {
-    /// Governance account type
-    pub account_type: ShihonAccountType,
-
-    /// Community mint
-    pub community_mint: Pubkey,
-
-    /// Configuration of the Realm
-    pub config: RealmConfig,
-
-    /// Reserved space for future versions
-    pub reserved: [u8; 8],
-
-    /// Realm authority. The authority must sign transactions which update the realm config
-    /// The authority should be transferred to Realm Governance to make the Realm self governed through proposals
-    pub authority: Option<Pubkey>,
-
-    /// Governance Realm name
-    pub name: String,
-}
-
-impl AccountMaxSize for Realm {
+impl AccountMaxSize for BcToken {
     fn get_max_size(&self) -> Option<usize> {
         Some(self.name.len() + 136)
     }
 }
 
-impl IsInitialized for Realm {
+impl IsInitialized for BcToken {
     fn is_initialized(&self) -> bool {
         self.account_type == ShihonAccountType::
     }
 }
 
-impl Realm {
+impl BcToken {
     /// Asserts the given mint is either Community or Council mint of the Realm
     pub fn assert_is_valid_governing_token_mint(
         &self,
@@ -275,7 +234,7 @@ pub fn get_governing_token_holding_address(
 }
 
 /// Asserts given realm config args are correct
-pub fn assert_valid_realm_config_args(config_args: &RealmConfigArgs) -> Result<(), ProgramError> {
+pub fn assert_valid_realm_config_args(config_args: &BcTokenConfigArgs) -> Result<(), ProgramError> {
     match config_args.community_mint_max_vote_weight_source {
         MintMaxVoteWeightSource::SupplyFraction(fraction) => {
             if !(1..=MintMaxVoteWeightSource::SUPPLY_FRACTION_BASE).contains(&fraction) {

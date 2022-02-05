@@ -1,44 +1,4 @@
-use crate::PROGRAM_AUTHORITY_SEED;
-use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::clock::{Slot, UnixTimestamp};
-use solana_program::{
-    program_error::ProgramError,
-    program_pack::{IsInitialized, Pack, Sealed},
-    pubkey::Pubkey,
-};
-
-/// state for rating the content
-pub struct Rate {
-    pub is_initialized: bool,
-    pub rated_content: Pubkey,
-    pub rater_pubkey: Pubkey,
-    pub rate_amount: u64,
-    pub temp_rating_account_pubkey: Pubkey,
-}
-
-impl Sealed for Rate {}
-
-impl IsInitialized for Rate {
-    fn is_initialized(&self) -> bool {
-        self.is_initialized
-    }
-}
-
-impl Pack for Rate {
-    const LEN: usize = 96;
-
-    fn pack_into_slice(&self, dst: &mut [u8]) {
-        unimplemented!();
-    }
-
-    fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
-        unimplemented!();
-    }
-}
-
-
-
-//! Proposal  Account
+//! Mix and Rate Account
 
 use borsh::maybestd::io::Write;
 use std::cmp::Ordering;
@@ -57,8 +17,8 @@ use crate::{
     error::ShihonError,
     state::{
         enums::{
-            ShihonAccountType, InstructionExecutionFlags, InstructionExecutionStatus,
-            MintMaxVoteWeightSource, ProposalState, VoteThresholdPercentage,
+            InstructionExecutionFlags, InstructionExecutionStatus, MintMaxVoteWeightSource,
+            ProposalState, ShihonAccountType, VoteThresholdPercentage,
         },
         governance::GovernanceConfig,
         proposal_instruction::ProposalInstructionV2,
@@ -69,7 +29,23 @@ use crate::{
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 
-/// Proposal option vote result
+/// state for rating the content
+pub struct Rate {
+    pub is_initialized: bool,
+    pub rated_content: Pubkey,
+    pub rater_pubkey: Pubkey,
+    pub rate_amount: u64,
+    pub temp_rating_account_pubkey: Pubkey,
+}
+
+///TODO: need to make mix modules with rating function
+impl IsInitialized for Rate {
+    fn is_initialized(&self) -> bool {
+        self.is_initialized
+    }
+}
+
+/// Rate option vote result
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum OptionVoteResult {
     /// Vote on the option is not resolved yet
@@ -82,9 +58,9 @@ pub enum OptionVoteResult {
     Defeated,
 }
 
-/// Proposal Option
+/// Rate Option
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct ProposalOption {
+pub struct RateOption {
     /// Option label
     pub label: String,
 
@@ -104,7 +80,7 @@ pub struct ProposalOption {
     pub instructions_next_index: u16,
 }
 
-/// Proposal vote type
+/// Rating vote type
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum VoteType {
     /// Single choice vote with mutually exclusive choices
@@ -119,7 +95,7 @@ pub enum VoteType {
     MultiChoice(u16),
 }
 
-/// Governance Proposal
+/// Rating
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct ProposalV2 {
     /// Governance account type
@@ -135,7 +111,6 @@ pub struct ProposalV2 {
     /// Current proposal state
     pub state: ProposalState,
 
-    // TODO: add state_at timestamp to have single field to filter recent proposals in the UI
     /// The TokenOwnerRecord representing the user who created and owns this Proposal
     pub token_owner_record: Pubkey,
 
@@ -149,7 +124,7 @@ pub struct ProposalV2 {
     pub vote_type: VoteType,
 
     /// Proposal options
-    pub options: Vec<ProposalOption>,
+    pub options: Vec<RateOption>,
 
     /// The weight of the Proposal rejection votes
     /// If the proposal has no deny option then the weight is None
@@ -549,9 +524,7 @@ impl ProposalV2 {
             | ProposalState::Completed
             | ProposalState::Cancelled
             | ProposalState::Succeeded
-            | ProposalState::Defeated => {
-                Err(ShihonError::InvalidStateCannotCancelProposal.into())
-            }
+            | ProposalState::Defeated => Err(ShihonError::InvalidStateCannotCancelProposal.into()),
         }
     }
 
@@ -748,8 +721,7 @@ pub fn get_proposal_data(
     program_id: &Pubkey,
     proposal_info: &AccountInfo,
 ) -> Result<ProposalV2, ProgramError> {
-    let account_type: ShihonAccountType =
-        try_from_slice_unchecked(&proposal_info.data.borrow())?;
+    let account_type: ShihonAccountType = try_from_slice_unchecked(&proposal_info.data.borrow())?;
 
     // If the account is V1 version then translate to V2
     if account_type == ShihonAccountType::ProposalV1 {
@@ -883,4 +855,3 @@ pub fn assert_valid_proposal_options(
 
     Ok(())
 }
-

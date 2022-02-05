@@ -17,18 +17,12 @@ use spl_governance_tools::{
     error::GovernanceToolsError,
 };
 
-pub struct Tanistry {}
 
-impl IsInitialized for Tanistry {
-    fn is_initialized(&self) -> bool {
-        self.is_initialized
-    }
-}
 
 /// Tanistry config
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct GovernanceConfig {
+pub struct TanistryConfig {
     /// The type of the vote threshold used for voting
     /// Note: In the current version only YesVote threshold is supported
     pub vote_threshold_percentage: VoteThresholdPercentage,
@@ -61,36 +55,22 @@ pub struct GovernanceConfig {
 pub struct Tanistry {
     pub is_initialized: bool,
     pub kicker_pubkey: Pubkey,
-    pub temp_token_account_pubkey: Pubkey,
-    pub kicker_token_to_receive_account_pubkey: Pubkey,
     pub next_tanistry_id: Option<Pubkey>,
     pub previous_tanistry_id: Option<Pubkey>,
-    pub rating_list: [&Rate],
-    pub number_of_round: u64,
     pub building_key: Vec<u8>,
-    pub iterator_of_forward_for_minting: u64,
 
     pub account_type: ShihonAccountType,
 
-    /// Governance Realm
-    pub realm: Pubkey,
-
-    /// Account governed by this Governance. It can be for example Program account, Mint account or Token Account
-    pub governed_account: Pubkey,
-
-    /// Running count of proposals
-    pub proposals_count: u32,
-
     /// Governance config
-    pub config: GovernanceConfig,
+    pub config: TanistryConfig,
 
     /// Reserved space for future versions
     pub reserved: [u8; 8],
 }
 
-impl AccountMaxSize for Governance {}
+impl AccountMaxSize for Tanistry {}
 
-impl IsInitialized for Governance {
+impl IsInitialized for Tanistry {
     fn is_initialized(&self) -> bool {
         self.account_type == ShihonAccountType::AccountGovernance
             || self.account_type == ShihonAccountType::ProgramGovernance
@@ -99,9 +79,9 @@ impl IsInitialized for Governance {
     }
 }
 
-impl Governance {
-    /// Returns Governance PDA seeds
-    pub fn get_governance_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
+impl Tanistry {
+    /// Returns Tanistry PDA seeds
+    pub fn get_tanistry_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
         let seeds = match self.account_type {
             ShihonAccountType::AccountGovernance => {
                 get_account_governance_address_seeds(&self.realm, &self.governed_account)
@@ -122,27 +102,27 @@ impl Governance {
     }
 }
 
-/// Deserializes Governance account and checks owner program
-pub fn get_governance_data(
+/// Deserializes Tanistry account and checks owner program
+pub fn get_tanistry_data(
     program_id: &Pubkey,
-    governance_info: &AccountInfo,
-) -> Result<Governance, ProgramError> {
-    get_account_data::<Governance>(program_id, governance_info)
+    tanistry_info: &AccountInfo,
+) -> Result<Tanistry, ProgramError> {
+    get_account_data::<Tanistry>(program_id, tanistry_info)
 }
 
-/// Deserializes Governance account, checks owner program and asserts governance belongs to the given ream
-pub fn get_governance_data_for_realm(
+/// Deserializes Tanistry account, checks owner program and asserts governance belongs to the given ream
+pub fn get_tanistry_data_for_bc_token(
     program_id: &Pubkey,
-    governance_info: &AccountInfo,
-    realm: &Pubkey,
-) -> Result<Governance, ProgramError> {
-    let governance_data = get_governance_data(program_id, governance_info)?;
+    tanistry_info: &AccountInfo,
+    bc_token: &Pubkey,
+) -> Result<Tanistry, ProgramError> {
+    let tanistry_data = get_tanistry_data(program_id, tanistry_info)?;
 
-    if governance_data.realm != *realm {
+    if tanistry_data.bc_token != *bc_token {
         return Err(ShihonError::InvalidRealmForGovernance.into());
     }
 
-    Ok(governance_data)
+    Ok(tanistry_data)
 }
 
 /// Checks the given account is a governance account and belongs to the given realm
@@ -151,12 +131,12 @@ pub fn assert_governance_for_realm(
     governance_info: &AccountInfo,
     realm: &Pubkey,
 ) -> Result<(), ProgramError> {
-    get_governance_data_for_realm(program_id, governance_info, realm)?;
+    get_tanistry_data_for_bc_token(program_id, tanistry_info, bc_token)?;
     Ok(())
 }
 
-/// Returns ProgramGovernance PDA seeds
-pub fn get_program_governance_address_seeds<'a>(
+/// Returns Tanistry PDA seeds
+pub fn get_program_tanistry_address_seeds<'a>(
     realm: &'a Pubkey,
     governed_program: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
@@ -170,20 +150,20 @@ pub fn get_program_governance_address_seeds<'a>(
 }
 
 /// Returns ProgramGovernance PDA address
-pub fn get_program_governance_address<'a>(
+pub fn get_program_tanistry_address<'a>(
     program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_program: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_program_governance_address_seeds(realm, governed_program),
+        &get_program_tanistry_address_seeds(realm, governed_program),
         program_id,
     )
     .0
 }
 
-/// Returns MintGovernance PDA seeds
-pub fn get_mint_governance_address_seeds<'a>(
+/// Returns MintTanistry PDA seeds
+pub fn get_mint_tanistry_address_seeds<'a>(
     realm: &'a Pubkey,
     governed_mint: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
@@ -192,21 +172,21 @@ pub fn get_mint_governance_address_seeds<'a>(
     [b"mint-governance", realm.as_ref(), governed_mint.as_ref()]
 }
 
-/// Returns MintGovernance PDA address
-pub fn get_mint_governance_address<'a>(
+/// Returns MintTanistry PDA address
+pub fn get_mint_tanistry_address<'a>(
     program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_mint: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_mint_governance_address_seeds(realm, governed_mint),
+        &get_mint_tanistry_address_seeds(realm, governed_mint),
         program_id,
     )
     .0
 }
 
 /// Returns TokenGovernance PDA seeds
-pub fn get_token_governance_address_seeds<'a>(
+pub fn get_token_tanistry_address_seeds<'a>(
     realm: &'a Pubkey,
     governed_token: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
@@ -215,21 +195,21 @@ pub fn get_token_governance_address_seeds<'a>(
     [b"token-governance", realm.as_ref(), governed_token.as_ref()]
 }
 
-/// Returns TokenGovernance PDA address
-pub fn get_token_governance_address<'a>(
+/// Returns TokenTanistry PDA address
+pub fn get_token_tanistry_address<'a>(
     program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_token: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_token_governance_address_seeds(realm, governed_token),
+        &get_token_tanistry_address_seeds(realm, governed_token),
         program_id,
     )
     .0
 }
 
-/// Returns AccountGovernance PDA seeds
-pub fn get_account_governance_address_seeds<'a>(
+/// Returns AccountTanistry PDA seeds
+pub fn get_account_tanistry_address_seeds<'a>(
     realm: &'a Pubkey,
     governed_account: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
@@ -240,21 +220,21 @@ pub fn get_account_governance_address_seeds<'a>(
     ]
 }
 
-/// Returns AccountGovernance PDA address
-pub fn get_account_governance_address<'a>(
+/// Returns AccountTanistry PDA address
+pub fn get_account_tanistry_address<'a>(
     program_id: &Pubkey,
     realm: &'a Pubkey,
     governed_account: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_account_governance_address_seeds(realm, governed_account),
+        &get_account_tanistry_address_seeds(realm, governed_account),
         program_id,
     )
     .0
 }
 
-/// Checks whether governance account exists, is initialized and owned by the Governance program
-pub fn assert_is_valid_governance(
+/// Checks whether tanistry account exists, is initialized and owned by the Tanistry program
+pub fn assert_is_valid_tanistry(
     program_id: &Pubkey,
     governance_info: &AccountInfo,
 ) -> Result<(), ProgramError> {

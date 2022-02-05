@@ -23,64 +23,44 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-/// Governance Token Owner Record
-/// Account PDA seeds: ['governance', realm, token_mint, token_owner ]
+/// Account PDA seeds: ['shihon', bcToken, token_mint, token_owner ]
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct TokenOwnerRecord {
-    /// Governance account type
+pub struct OutsideBuyerRecord {
+    /// OutsideBuyerRecord account type
     pub account_type: ShihonAccountType,
 
-    /// The Realm the TokenOwnerRecord belongs to
-    pub realm: Pubkey,
+    /// The Tanistry the OutsideBuyerRecord belongs to
+    pub tanistry: Pubkey,
 
-    /// Governing Token Mint the TokenOwnerRecord holds deposit for
-    pub governing_token_mint: Pubkey,
+    /// Buyer Token Mint the OutsideBuyerRecord holds deposit for
+    pub outside_buyer_token_mint: Pubkey,
 
     /// The owner (either single or multisig) of the deposited governing SPL Tokens
     /// This is who can authorize a withdrawal of the tokens
-    pub governing_token_owner: Pubkey,
+    pub outside_buyer_token_owner: Pubkey,
 
-    /// The amount of governing tokens deposited into the Realm
-    /// This amount is the voter weight used when voting on proposals
-    pub governing_token_deposit_amount: u64,
-
-    /// The number of votes cast by TokenOwner but not relinquished yet
-    /// Every time a vote is cast this number is increased and it's always decreased when relinquishing a vote regardless of the vote state
-    pub unrelinquished_votes_count: u32,
-
-    /// The total number of votes cast by the TokenOwner
-    /// If TokenOwner withdraws vote while voting is still in progress total_votes_count is decreased  and the vote doesn't count towards the total
-    pub total_votes_count: u32,
-
-    /// The number of outstanding proposals the TokenOwner currently owns
-    /// The count is increased when TokenOwner creates a proposal
-    /// and decreased  once it's either voted on (Succeeded or Defeated) or Cancelled
-    /// By default it's restricted to 1 outstanding Proposal per token owner
-    pub outstanding_proposal_count: u8,
+    /// This amount is the voter weight used when voting on rater
+    pub outside_buyer_token_deposit_amount: u64,
 
     /// Reserved space for future versions
     pub reserved: [u8; 7],
-
-    /// A single account that is allowed to operate governance with the deposited governing tokens
-    /// It can be delegated to by the governing_token_owner or current governance_delegate
-    pub governance_delegate: Option<Pubkey>,
 }
 
-impl AccountMaxSize for TokenOwnerRecord {
+impl AccountMaxSize for OutsideBuyerRecord {
     fn get_max_size(&self) -> Option<usize> {
         Some(154)
     }
 }
 
-impl IsInitialized for TokenOwnerRecord {
+impl IsInitialized for OutsideBuyerRecord {
     fn is_initialized(&self) -> bool {
-        self.account_type == ShihonAccountType::TokenOwnerRecord
+        self.account_type == ShihonAccountType::OutsideBuyerRecord
     }
 }
-
-impl TokenOwnerRecord {
-    /// Checks whether the provided Governance Authority signed transaction
+///TODO: not yet fix this associated functions
+impl OutsideBuyerRecord {
+    /// Checks whether the provided exceeded rating token Authority signed transaction
     pub fn assert_token_owner_or_delegate_is_signer(
         &self,
         governance_authority_info: &AccountInfo,
@@ -209,99 +189,110 @@ impl TokenOwnerRecord {
     }
 }
 
-/// Returns TokenOwnerRecord PDA address
-pub fn get_token_owner_record_address(
+/// Returns OutsideBuyerRecord PDA address
+pub fn get_outside_buyer_token_owner_record_address(
     program_id: &Pubkey,
-    realm: &Pubkey,
-    governing_token_mint: &Pubkey,
-    governing_token_owner: &Pubkey,
+    rater_pubkey: &Pubkey,
+    outside_buyer_token_mint: &Pubkey,
+    outside_buyer_token_owner: &Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_token_owner_record_address_seeds(realm, governing_token_mint, governing_token_owner),
+        &get_outside_buyer_token_owner_record_address_seeds(
+            rater_pubkey,
+            outside_buyer_token_mint,
+            outside_buyer_token_owner,
+        ),
         program_id,
     )
     .0
 }
 
-/// Returns TokenOwnerRecord PDA seeds
-pub fn get_token_owner_record_address_seeds<'a>(
-    realm: &'a Pubkey,
-    governing_token_mint: &'a Pubkey,
-    governing_token_owner: &'a Pubkey,
+/// Returns OutsideBuyerRecord PDA seeds
+pub fn get_outside_buyer_token_owner_record_address_seeds<'a>(
+    rater_pubkey: &'a Pubkey,
+    outside_buyer_token_mint: &'a Pubkey,
+    outside_buyer_token_owner: &'a Pubkey,
 ) -> [&'a [u8]; 4] {
     [
         PROGRAM_AUTHORITY_SEED,
-        realm.as_ref(),
-        governing_token_mint.as_ref(),
-        governing_token_owner.as_ref(),
+        rater_pubkey.as_ref(),
+        outside_buyer_token_mint.as_ref(),
+        outside_buyer_token_owner.as_ref(),
     ]
 }
 
-/// Deserializes TokenOwnerRecord account and checks owner program
-pub fn get_token_owner_record_data(
+/// Deserializes OutsideBuyerRecord account and checks owner program
+pub fn get_outside_buyer_token_owner_record_data(
     program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-) -> Result<TokenOwnerRecord, ProgramError> {
-    get_account_data::<TokenOwnerRecord>(program_id, token_owner_record_info)
+    outside_buyer_token_owner_record_info: &AccountInfo,
+) -> Result<OutsideBuyerRecord, ProgramError> {
+    get_account_data::<OutsideBuyerRecord>(program_id, outside_buyer_token_owner_record_info)
 }
 
-/// Deserializes TokenOwnerRecord account and checks its PDA against the provided seeds
-pub fn get_token_owner_record_data_for_seeds(
+/// Deserializes OutsideBuyerRecord account and checks its PDA against the provided seeds
+pub fn get_outside_buyer_token_owner_record_data_for_seeds(
     program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-    token_owner_record_seeds: &[&[u8]],
-) -> Result<TokenOwnerRecord, ProgramError> {
-    let (token_owner_record_address, _) =
-        Pubkey::find_program_address(token_owner_record_seeds, program_id);
+    outside_buyer_token_owner_record_info: &AccountInfo,
+    outside_buyer_token_owner_record_seeds: &[&[u8]],
+) -> Result<OutsideBuyerRecord, ProgramError> {
+    let (outside_buyer_token_owner_record_address, _) =
+        Pubkey::find_program_address(outside_buyer_token_owner_record_seeds, program_id);
 
-    if token_owner_record_address != *token_owner_record_info.key {
-        return Err(ShihonError::InvalidTokenOwnerRecordAccountAddress.into());
+    if outside_buyer_token_owner_record_address != *outside_buyer_token_owner_record_info.key {
+        return Err(ShihonError::InvalidOutsideBuyerRecordAccountAddress.into());
     }
 
-    get_token_owner_record_data(program_id, token_owner_record_info)
+    get_outside_buyer_token_owner_record_data(program_id, outside_buyer_token_owner_record_info)
 }
 
-/// Deserializes TokenOwnerRecord account and asserts it belongs to the given realm
-pub fn get_token_owner_record_data_for_realm(
+/// Deserializes OutsideBuyerRecord account and asserts it belongs to the given realm
+pub fn get_outside_buyer_token_owner_record_data_for_realm(
     program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-    realm: &Pubkey,
-) -> Result<TokenOwnerRecord, ProgramError> {
-    let token_owner_record_data = get_token_owner_record_data(program_id, token_owner_record_info)?;
+    outside_buyer_token_owner_record_info: &AccountInfo,
+    rater_pubkey: &Pubkey,
+) -> Result<OutsideBuyerRecord, ProgramError> {
+    let outside_buyer_token_owner_record_data = get_outside_buyer_token_owner_record_data(
+        program_id,
+        outside_buyer_token_owner_record_info,
+    )?;
 
-    if token_owner_record_data.realm != *realm {
-        return Err(ShihonError::InvalidRealmForTokenOwnerRecord.into());
+    if outside_buyer_token_owner_record_data.rater_pubkey != *rater_pubkey {
+        return Err(ShihonError::InvalidRealmForOutsideBuyerRecord.into());
     }
 
-    Ok(token_owner_record_data)
+    Ok(outside_buyer_token_owner_record_data)
 }
 
-/// Deserializes TokenOwnerRecord account and  asserts it belongs to the given realm and is for the given governing mint
-pub fn get_token_owner_record_data_for_realm_and_governing_mint(
+/// Deserializes OutsideBuyerRecord account and  asserts it belongs to the given realm and is for the given governing mint
+pub fn get_outside_buyer_token_owner_record_data_for_rater_and_outside_buyer_mint(
     program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-    realm: &Pubkey,
-    governing_token_mint: &Pubkey,
-) -> Result<TokenOwnerRecord, ProgramError> {
-    let token_owner_record_data =
-        get_token_owner_record_data_for_realm(program_id, token_owner_record_info, realm)?;
+    outside_buyer_token_owner_record_info: &AccountInfo,
+    rater_pubkey: &Pubkey,
+    outside_buyer_token_mint: &Pubkey,
+) -> Result<OutsideBuyerRecord, ProgramError> {
+    let outside_buyer_token_owner_record_data =
+        get_outside_buyer_token_owner_record_data_for_content_owner(
+            program_id,
+            outside_buyer_token_owner_record_info,
+            rater_pubkey,
+        )?;
 
-    if token_owner_record_data.governing_token_mint != *governing_token_mint {
-        return Err(ShihonError::InvalidGoverningMintForTokenOwnerRecord.into());
+    if outside_buyer_token_owner_record_data.outside_buyer_token_mint != *outside_buyer_token_mint {
+        return Err(ShihonError::InvalidGoverningMintForOutsideBuyerRecord.into());
     }
 
-    Ok(token_owner_record_data)
+    Ok(outside_buyer_token_owner_record_data)
 }
 
-///  Deserializes TokenOwnerRecord account and checks its address is the give proposal_owner
-pub fn get_token_owner_record_data_for_proposal_owner(
+///  Deserializes OutsideBuyerRecord account and checks its address is the give proposal_owner
+pub fn get_outside_buyer_token_owner_record_data_for_content_owner(
     program_id: &Pubkey,
-    token_owner_record_info: &AccountInfo,
-    proposal_owner: &Pubkey,
-) -> Result<TokenOwnerRecord, ProgramError> {
-    if token_owner_record_info.key != proposal_owner {
+    outside_buyer_token_owner_record_info: &AccountInfo,
+    content_owner: &Pubkey,
+) -> Result<OutsideBuyerRecord, ProgramError> {
+    if outside_buyer_token_owner_record_info.key != content_owner {
         return Err(ShihonError::InvalidProposalOwnerAccount.into());
     }
 
-    get_token_owner_record_data(program_id, token_owner_record_info)
+    get_outside_buyer_token_owner_record_data(program_id, outside_buyer_token_owner_record_info)
 }
