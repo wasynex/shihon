@@ -2,7 +2,7 @@ use solana_program::{
     account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, pubkey::Pubkey,
 };
 
-use crate::processor::Processor;
+use crate::processor::set::Processor;
 
 entrypoint!(process_instruction);
 fn process_instruction(

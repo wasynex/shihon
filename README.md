@@ -15,14 +15,15 @@ For a more detailed explanation, see [documents](https://docs.shihonics.com)
 
 ## Development setup
 
-This project is based on Solana Escrow.
-See [Programming on Solana - An Introduction](https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/) for more details.
+This project is based on Solana Governance Project (DAO).
 
 For more Solana specifications, read
 
+- [Programming on Solana - An Introduction](https://paulx.dev/blog/2021/01/14/programming-on-solana-an-introduction/)
+
 - [Solana Document](https://docs.solana.com/)
 
-- [Solana Cockbook](https://solanacookbook.com/)
+- [Solana Cookbook](https://solanacookbook.com/)
 
 
 ## Release History
