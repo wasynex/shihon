@@ -9,52 +9,22 @@ pub enum ShihonAccountType {
     /// Default uninitialized account state
     Uninitialized,
 
-    /// Top level aggregation for governances with Community Token (and optional Council Token)
-    Realm,
-
-    /// Token Owner Record for given governing token owner within a Realm
+    /// Token Owner Record for given governing token owner within a Tanistry
     TokenOwnerRecord,
 
-    /// Generic Account Governance account
-    AccountGovernance,
+    /// for candidate limit
+    CandidateLimitRecord,
 
-    /// Program Governance account
-    ProgramGovernance,
+    /// for rating other's content
+    RateOtherRecord,
 
-    /// Proposal account for Governance account. A single Governance account can have multiple Proposal accounts
-    ProposalV1,
+    /// Outside buyer account
+    OutsideBuyerRecord,
 
-    /// Proposal Signatory account
-    SignatoryRecord,
+    /// for cc voting
+    CCVoteRecord,
 
-    /// Vote record account for a given Proposal.  Proposal can have 0..n voting records
-    VoteRecordV1,
-
-    /// ProposalInstruction account which holds an instruction to execute for Proposal
-    ProposalInstructionV1,
-
-    /// Mint Governance account
-    MintGovernance,
-
-    /// Token Governance account
-    TokenGovernance,
-
-    /// Realm config account
-    RealmConfig,
-
-    /// Vote record account for a given Proposal.  Proposal can have 0..n voting records
-    /// V2 adds support for multi option votes
-    VoteRecordV2,
-
-    /// ProposalInstruction account which holds an instruction to execute for Proposal
-    /// V2 adds index for proposal option
-    ProposalInstructionV2,
-
-    /// Proposal account for Governance account. A single Governance account can have multiple Proposal accounts
-    /// V2 adds support for multiple vote options
-    ProposalV2,
-
-    /// Program metadata account. It stores information about the particular SPL-Governance program instance
+    /// bcToken's inside metadata
     BcTokenMetadata,
 }
 
@@ -68,35 +38,32 @@ impl Default for ShihonAccountType {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum BcTokenState {
-    /// Draft - Proposal enters Draft state when it's created
+    /// before creating bcToken
     Draft,
 
-    /// SigningOff - The Proposal is being signed off by Signatories
-    /// Proposal enters the state when first Signatory Sings and leaves it when last Signatory signs
-    SigningOff,
+    /// just for holding own content when reached to Oracle
+    Private,
 
-    /// Taking votes
-    Voting,
+    /// for casting own content for waiting a KickerCoin
+    Public,
+
+    /// enable to candidate on Tanistry
+    Executing,
 
     /// Voting ended with success
     Succeeded,
 
-    /// Voting on Proposal succeeded and now instructions are being executed
-    /// Proposal enter this state when first instruction is executed and leaves when the last instruction is executed
-    Executing,
-
-    /// Completed
+    /// Enable to refund
     Completed,
 
     /// Cancelled
     Cancelled,
 
-    /// Defeated
-    Defeated,
-
-    /// Same as Executing but indicates some instructions failed to execute
-    /// Proposal can't be transitioned from ExecutingWithErrors to Completed state
+    /// some error happened when created
     ExecutingWithErrors,
+
+    /// Taking votes
+    Voting,
 }
 
 impl Default for BcTokenState {
