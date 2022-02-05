@@ -54,7 +54,7 @@ use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
 use crate::state::legacy::ProposalV1;
 use crate::{
-    error::GovernanceError,
+    error::ShihonError,
     state::{
         enums::{
             GovernanceAccountType, InstructionExecutionFlags, InstructionExecutionStatus,
@@ -217,7 +217,7 @@ impl ProposalV2 {
     /// Checks if Signatories can be edited (added or removed) for the Proposal in the given state
     pub fn assert_can_edit_signatories(&self) -> Result<(), ProgramError> {
         self.assert_is_draft_state()
-            .map_err(|_| GovernanceError::InvalidStateCannotEditSignatories.into())
+            .map_err(|_| ShihonError::InvalidStateCannotEditSignatories.into())
     }
 
     /// Checks if Proposal can be singed off
@@ -230,14 +230,14 @@ impl ProposalV2 {
             | ProposalState::Cancelled
             | ProposalState::Voting
             | ProposalState::Succeeded
-            | ProposalState::Defeated => Err(GovernanceError::InvalidStateCannotSignOff.into()),
+            | ProposalState::Defeated => Err(ShihonError::InvalidStateCannotSignOff.into()),
         }
     }
 
     /// Checks the Proposal is in Voting state
     fn assert_is_voting_state(&self) -> Result<(), ProgramError> {
         if self.state != ProposalState::Voting {
-            return Err(GovernanceError::InvalidProposalState.into());
+            return Err(ShihonError::InvalidProposalState.into());
         }
 
         Ok(())
@@ -246,7 +246,7 @@ impl ProposalV2 {
     /// Checks the Proposal is in Draft state
     fn assert_is_draft_state(&self) -> Result<(), ProgramError> {
         if self.state != ProposalState::Draft {
-            return Err(GovernanceError::InvalidProposalState.into());
+            return Err(ShihonError::InvalidProposalState.into());
         }
 
         Ok(())
@@ -259,11 +259,11 @@ impl ProposalV2 {
         current_unix_timestamp: UnixTimestamp,
     ) -> Result<(), ProgramError> {
         self.assert_is_voting_state()
-            .map_err(|_| GovernanceError::InvalidStateCannotVote)?;
+            .map_err(|_| ShihonError::InvalidStateCannotVote)?;
 
         // Check if we are still within the configured max_voting_time period
         if self.has_vote_time_ended(config, current_unix_timestamp) {
-            return Err(GovernanceError::ProposalVotingTimeExpired.into());
+            return Err(ShihonError::ProposalVotingTimeExpired.into());
         }
 
         Ok(())
@@ -290,11 +290,11 @@ impl ProposalV2 {
         current_unix_timestamp: UnixTimestamp,
     ) -> Result<(), ProgramError> {
         self.assert_is_voting_state()
-            .map_err(|_| GovernanceError::InvalidStateCannotFinalize)?;
+            .map_err(|_| ShihonError::InvalidStateCannotFinalize)?;
 
         // We can only finalize the vote after the configured max_voting_time has expired and vote time ended
         if !self.has_vote_time_ended(config, current_unix_timestamp) {
-            return Err(GovernanceError::CannotFinalizeVotingInProgress.into());
+            return Err(ShihonError::CannotFinalizeVotingInProgress.into());
         }
 
         Ok(())
@@ -445,7 +445,7 @@ impl ProposalV2 {
                 Ok(max_vote_weight.max(total_vote_weight))
             }
             MintMaxVoteWeightSource::Absolute(_) => {
-                Err(GovernanceError::VoteWeightSourceNotSupported.into())
+                Err(ShihonError::VoteWeightSourceNotSupported.into())
             }
         }
     }
@@ -540,7 +540,7 @@ impl ProposalV2 {
                 // Note: If there is no tipping point the proposal can be still in Voting state but already past the configured max_voting_time
                 // In that case we treat the proposal as finalized and it's no longer allowed to be canceled
                 if self.has_vote_time_ended(config, current_unix_timestamp) {
-                    return Err(GovernanceError::ProposalVotingTimeExpired.into());
+                    return Err(ShihonError::ProposalVotingTimeExpired.into());
                 }
                 Ok(())
             }
@@ -550,7 +550,7 @@ impl ProposalV2 {
             | ProposalState::Cancelled
             | ProposalState::Succeeded
             | ProposalState::Defeated => {
-                Err(GovernanceError::InvalidStateCannotCancelProposal.into())
+                Err(ShihonError::InvalidStateCannotCancelProposal.into())
             }
         }
     }
@@ -559,12 +559,12 @@ impl ProposalV2 {
     /// It also asserts whether the Proposal is executable (has the reject option)
     pub fn assert_can_edit_instructions(&self) -> Result<(), ProgramError> {
         if self.assert_is_draft_state().is_err() {
-            return Err(GovernanceError::InvalidStateCannotEditInstructions.into());
+            return Err(ShihonError::InvalidStateCannotEditInstructions.into());
         }
 
         // For security purposes only proposals with the reject option can have executable instructions
         if self.deny_vote_weight.is_none() {
-            return Err(GovernanceError::ProposalIsNotExecutable.into());
+            return Err(ShihonError::ProposalIsNotExecutable.into());
         }
 
         Ok(())
@@ -586,14 +586,14 @@ impl ProposalV2 {
             | ProposalState::Voting
             | ProposalState::Cancelled
             | ProposalState::Defeated => {
-                return Err(GovernanceError::InvalidStateCannotExecuteInstruction.into())
+                return Err(ShihonError::InvalidStateCannotExecuteInstruction.into())
             }
         }
 
         if self.options[proposal_instruction_data.option_index as usize].vote_result
             != OptionVoteResult::Succeeded
         {
-            return Err(GovernanceError::CannotExecuteDefeatedOption.into());
+            return Err(ShihonError::CannotExecuteDefeatedOption.into());
         }
 
         if self
@@ -603,11 +603,11 @@ impl ProposalV2 {
             .unwrap()
             >= current_unix_timestamp
         {
-            return Err(GovernanceError::CannotExecuteInstructionWithinHoldUpTime.into());
+            return Err(ShihonError::CannotExecuteInstructionWithinHoldUpTime.into());
         }
 
         if proposal_instruction_data.executed_at.is_some() {
-            return Err(GovernanceError::InstructionAlreadyExecuted.into());
+            return Err(ShihonError::InstructionAlreadyExecuted.into());
         }
 
         Ok(())
@@ -623,7 +623,7 @@ impl ProposalV2 {
         self.assert_can_execute_instruction(proposal_instruction_data, current_unix_timestamp)?;
 
         if proposal_instruction_data.execution_status == InstructionExecutionStatus::Error {
-            return Err(GovernanceError::InstructionAlreadyFlaggedWithError.into());
+            return Err(ShihonError::InstructionAlreadyFlaggedWithError.into());
         }
 
         Ok(())
@@ -634,39 +634,39 @@ impl ProposalV2 {
         match vote {
             Vote::Approve(choices) => {
                 if self.options.len() != choices.len() {
-                    return Err(GovernanceError::InvalidVote.into());
+                    return Err(ShihonError::InvalidVote.into());
                 }
 
                 let mut choice_count = 0u16;
 
                 for choice in choices {
                     if choice.rank > 0 {
-                        return Err(GovernanceError::InvalidVote.into());
+                        return Err(ShihonError::InvalidVote.into());
                     }
 
                     if choice.weight_percentage == 100 {
                         choice_count = choice_count.checked_add(1).unwrap();
                     } else if choice.weight_percentage != 0 {
-                        return Err(GovernanceError::InvalidVote.into());
+                        return Err(ShihonError::InvalidVote.into());
                     }
                 }
 
                 match self.vote_type {
                     VoteType::SingleChoice => {
                         if choice_count != 1 {
-                            return Err(GovernanceError::InvalidVote.into());
+                            return Err(ShihonError::InvalidVote.into());
                         }
                     }
                     VoteType::MultiChoice(_n) => {
                         if choice_count == 0 {
-                            return Err(GovernanceError::InvalidVote.into());
+                            return Err(ShihonError::InvalidVote.into());
                         }
                     }
                 }
             }
             Vote::Deny => {
                 if self.deny_vote_weight.is_none() {
-                    return Err(GovernanceError::InvalidVote.into());
+                    return Err(ShihonError::InvalidVote.into());
                 }
             }
         }
@@ -726,7 +726,7 @@ fn get_min_vote_threshold_weight(
             *yes_vote_threshold_percentage
         }
         _ => {
-            return Err(GovernanceError::VoteThresholdPercentageTypeNotSupported.into());
+            return Err(ShihonError::VoteThresholdPercentageTypeNotSupported.into());
         }
     };
 
@@ -813,7 +813,7 @@ pub fn get_proposal_data_for_governance_and_governing_mint(
     let proposal_data = get_proposal_data_for_governance(program_id, proposal_info, governance)?;
 
     if proposal_data.governing_token_mint != *governing_token_mint {
-        return Err(GovernanceError::InvalidGoverningMintForProposal.into());
+        return Err(ShihonError::InvalidGoverningMintForProposal.into());
     }
 
     Ok(proposal_data)
@@ -828,7 +828,7 @@ pub fn get_proposal_data_for_governance(
     let proposal_data = get_proposal_data(program_id, proposal_info)?;
 
     if proposal_data.governance != *governance {
-        return Err(GovernanceError::InvalidGovernanceForProposal.into());
+        return Err(ShihonError::InvalidGovernanceForProposal.into());
     }
 
     Ok(proposal_data)
@@ -868,17 +868,17 @@ pub fn assert_valid_proposal_options(
     vote_type: &VoteType,
 ) -> Result<(), ProgramError> {
     if options.is_empty() {
-        return Err(GovernanceError::InvalidProposalOptions.into());
+        return Err(ShihonError::InvalidProposalOptions.into());
     }
 
     if let VoteType::MultiChoice(n) = *vote_type {
         if options.len() == 1 || n as usize != options.len() {
-            return Err(GovernanceError::InvalidProposalOptions.into());
+            return Err(ShihonError::InvalidProposalOptions.into());
         }
     }
 
     if options.iter().any(|o| o.is_empty()) {
-        return Err(GovernanceError::InvalidProposalOptions.into());
+        return Err(ShihonError::InvalidProposalOptions.into());
     }
 
     Ok(())
@@ -1070,7 +1070,7 @@ mod test {
                 let err = proposal.assert_can_edit_signatories().err().unwrap();
 
                 // Assert
-                assert_eq!(err, GovernanceError::InvalidStateCannotEditSignatories.into());
+                assert_eq!(err, ShihonError::InvalidStateCannotEditSignatories.into());
         }
 
     }
@@ -1110,7 +1110,7 @@ mod test {
                 let err = proposal.assert_can_sign_off().err().unwrap();
 
                 // Assert
-                assert_eq!(err, GovernanceError::InvalidStateCannotSignOff.into());
+                assert_eq!(err, ShihonError::InvalidStateCannotSignOff.into());
         }
     }
 
@@ -1164,7 +1164,7 @@ mod test {
                 let err = proposal.assert_can_cancel(&governance_config,1).err().unwrap();
 
                 // Assert
-                assert_eq!(err, GovernanceError::InvalidStateCannotCancelProposal.into());
+                assert_eq!(err, ShihonError::InvalidStateCannotCancelProposal.into());
         }
 
     }
@@ -1790,7 +1790,7 @@ mod test {
             .unwrap();
 
         // Assert
-        assert_eq!(err, GovernanceError::CannotFinalizeVotingInProgress.into());
+        assert_eq!(err, ShihonError::CannotFinalizeVotingInProgress.into());
     }
 
     #[test]
@@ -1828,7 +1828,7 @@ mod test {
             .unwrap();
 
         // Assert
-        assert_eq!(err, GovernanceError::ProposalVotingTimeExpired.into());
+        assert_eq!(err, ShihonError::ProposalVotingTimeExpired.into());
     }
 
     #[test]
@@ -1861,7 +1861,7 @@ mod test {
         let result = proposal.assert_valid_vote(&vote);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidVote.into()));
+        assert_eq!(result, Err(ShihonError::InvalidVote.into()));
     }
 
     #[test]
@@ -1889,7 +1889,7 @@ mod test {
         let result = proposal.assert_valid_vote(&vote);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidVote.into()));
+        assert_eq!(result, Err(ShihonError::InvalidVote.into()));
     }
 
     #[test]
@@ -1911,7 +1911,7 @@ mod test {
         let result = proposal.assert_valid_vote(&vote);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidVote.into()));
+        assert_eq!(result, Err(ShihonError::InvalidVote.into()));
     }
 
     #[test]
@@ -1942,7 +1942,7 @@ mod test {
         let result = proposal.assert_valid_vote(&vote);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidVote.into()));
+        assert_eq!(result, Err(ShihonError::InvalidVote.into()));
     }
 
     #[test]
@@ -1975,7 +1975,7 @@ mod test {
         let result = proposal.assert_valid_vote(&vote);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidVote.into()));
+        assert_eq!(result, Err(ShihonError::InvalidVote.into()));
     }
 
     #[test]
@@ -1990,7 +1990,7 @@ mod test {
         let result = assert_valid_proposal_options(&options, &vote_type);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidProposalOptions.into()));
+        assert_eq!(result, Err(ShihonError::InvalidProposalOptions.into()));
     }
 
     #[test]
@@ -2004,7 +2004,7 @@ mod test {
         let result = assert_valid_proposal_options(&options, &vote_type);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidProposalOptions.into()));
+        assert_eq!(result, Err(ShihonError::InvalidProposalOptions.into()));
     }
 
     #[test]
@@ -2018,7 +2018,7 @@ mod test {
         let result = assert_valid_proposal_options(&options, &vote_type);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidProposalOptions.into()));
+        assert_eq!(result, Err(ShihonError::InvalidProposalOptions.into()));
     }
 
     #[test]
@@ -2054,7 +2054,7 @@ mod test {
         let result = assert_valid_proposal_options(&options, &vote_type);
 
         // Assert
-        assert_eq!(result, Err(GovernanceError::InvalidProposalOptions.into()));
+        assert_eq!(result, Err(ShihonError::InvalidProposalOptions.into()));
     }
 
     #[test]

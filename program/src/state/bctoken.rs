@@ -75,7 +75,7 @@ use solana_program::{
 use spl_governance_tools::account::{assert_is_valid_account, get_account_data, AccountMaxSize};
 
 use crate::{
-    error::GovernanceError,
+    error::ShihonError,
     state::enums::{GovernanceAccountType, MintMaxVoteWeightSource},
     PROGRAM_AUTHORITY_SEED,
 };
@@ -170,7 +170,7 @@ impl Realm {
             return Ok(());
         }
 
-        Err(GovernanceError::InvalidGoverningTokenMint.into())
+        Err(ShihonError::InvalidGoverningTokenMint.into())
     }
 
     /// Asserts the given governing token mint and holding accounts are valid for the realm
@@ -187,7 +187,7 @@ impl Realm {
             get_governing_token_holding_address(program_id, realm, governing_token_mint);
 
         if governing_token_holding_address != *governing_token_holding {
-            return Err(GovernanceError::InvalidGoverningTokenHoldingAccount.into());
+            return Err(ShihonError::InvalidGoverningTokenHoldingAccount.into());
         }
 
         Ok(())
@@ -202,7 +202,7 @@ impl Realm {
         if self.config.use_community_voter_weight_addin
             && self.community_mint == *governing_token_mint
         {
-            return Err(GovernanceError::GoverningTokenDepositsNotAllowed.into());
+            return Err(ShihonError::GoverningTokenDepositsNotAllowed.into());
         }
 
         Ok(())
@@ -234,11 +234,11 @@ pub fn get_realm_data_for_authority(
     let realm_data = get_account_data::<Realm>(program_id, realm_info)?;
 
     if realm_data.authority.is_none() {
-        return Err(GovernanceError::RealmHasNoAuthority.into());
+        return Err(ShihonError::RealmHasNoAuthority.into());
     }
 
     if realm_data.authority.unwrap() != *realm_authority {
-        return Err(GovernanceError::InvalidAuthorityForRealm.into());
+        return Err(ShihonError::InvalidAuthorityForRealm.into());
     }
 
     Ok(realm_data)
@@ -297,11 +297,11 @@ pub fn assert_valid_realm_config_args(config_args: &RealmConfigArgs) -> Result<(
     match config_args.community_mint_max_vote_weight_source {
         MintMaxVoteWeightSource::SupplyFraction(fraction) => {
             if !(1..=MintMaxVoteWeightSource::SUPPLY_FRACTION_BASE).contains(&fraction) {
-                return Err(GovernanceError::InvalidMaxVoteWeightSupplyFraction.into());
+                return Err(ShihonError::InvalidMaxVoteWeightSupplyFraction.into());
             }
         }
         MintMaxVoteWeightSource::Absolute(_) => {
-            return Err(GovernanceError::MintMaxVoteWeightSourceNotSupported.into())
+            return Err(ShihonError::MintMaxVoteWeightSourceNotSupported.into())
         }
     }
 

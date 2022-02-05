@@ -7,7 +7,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::{error::GovernanceError, PROGRAM_AUTHORITY_SEED};
+use crate::{error::ShihonError, PROGRAM_AUTHORITY_SEED};
 
 use crate::state::enums::GovernanceAccountType;
 
@@ -40,11 +40,11 @@ impl SignatoryRecord {
     /// Checks signatory hasn't signed off yet and is transaction signer
     pub fn assert_can_sign_off(&self, signatory_info: &AccountInfo) -> Result<(), ProgramError> {
         if self.signed_off {
-            return Err(GovernanceError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
         if !signatory_info.is_signer {
-            return Err(GovernanceError::SignatoryMustSign.into());
+            return Err(ShihonError::SignatoryMustSign.into());
         }
 
         Ok(())
@@ -53,7 +53,7 @@ impl SignatoryRecord {
     /// Checks signatory can be removed from Proposal
     pub fn assert_can_remove_signatory(&self) -> Result<(), ProgramError> {
         if self.signed_off {
-            return Err(GovernanceError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
         Ok(())
@@ -106,7 +106,7 @@ pub fn get_signatory_record_data_for_seeds(
     );
 
     if signatory_record_address != *signatory_record_info.key {
-        return Err(GovernanceError::InvalidSignatoryAddress.into());
+        return Err(ShihonError::InvalidSignatoryAddress.into());
     }
 
     get_signatory_record_data(program_id, signatory_record_info)

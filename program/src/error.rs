@@ -3,7 +3,7 @@ use thiserror::Error;
 use solana_program::program_error::ProgramError;
 
 #[derive(Error, Debug, Copy, Clone)]
-pub enum TokenError {
+pub enum ShihonError {
     /// Invalid instruction
     #[error("Invalid Instruction")]
     InvalidInstruction,
@@ -18,8 +18,8 @@ pub enum TokenError {
     AmountOverflow,
 }
 
-impl From<TokenError> for ProgramError {
-    fn from(e: TokenError) -> Self {
+impl From<ShihonError> for ProgramError {
+    fn from(e: ShihonError) -> Self {
         ProgramError::Custom(e as u32)
     }
 }
