@@ -9,14 +9,14 @@ use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
 use crate::{error::ShihonError, PROGRAM_AUTHORITY_SEED};
 
-use crate::state::enums::GovernanceAccountType;
+use crate::state::enums::ShihonAccountType;
 
 /// Account PDA seeds: ['governance', proposal, signatory]
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct SignatoryRecord {
     /// Governance account type
-    pub account_type: GovernanceAccountType,
+    pub account_type: ShihonAccountType,
 
     /// Proposal the signatory is assigned for
     pub proposal: Pubkey,
@@ -32,7 +32,7 @@ impl AccountMaxSize for SignatoryRecord {}
 
 impl IsInitialized for SignatoryRecord {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::SignatoryRecord
+        self.account_type == ShihonAccountType::SignatoryRecord
     }
 }
 

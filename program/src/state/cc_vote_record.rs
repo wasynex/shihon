@@ -15,7 +15,7 @@ use crate::error::ShihonError;
 use crate::PROGRAM_AUTHORITY_SEED;
 
 use crate::state::{
-    enums::GovernanceAccountType,
+    enums::ShihonAccountType,
     legacy::{VoteRecordV1, VoteWeightV1},
 };
 
@@ -57,7 +57,7 @@ pub enum Vote {
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct VoteRecordV2 {
     /// Governance account type
-    pub account_type: GovernanceAccountType,
+    pub account_type: ShihonAccountType,
 
     /// Proposal account
     pub proposal: Pubkey,
@@ -80,7 +80,7 @@ impl AccountMaxSize for VoteRecordV2 {}
 
 impl IsInitialized for VoteRecordV2 {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::VoteRecordV2
+        self.account_type == ShihonAccountType::VoteRecordV2
     }
 }
 impl VoteRecordV2 {
@@ -95,9 +95,9 @@ impl VoteRecordV2 {
 
     /// Serializes account into the target buffer
     pub fn serialize<W: Write>(self, writer: &mut W) -> Result<(), ProgramError> {
-        if self.account_type == GovernanceAccountType::VoteRecordV2 {
+        if self.account_type == ShihonAccountType::VoteRecordV2 {
             BorshSerialize::serialize(&self, writer)?
-        } else if self.account_type == GovernanceAccountType::VoteRecordV1 {
+        } else if self.account_type == ShihonAccountType::VoteRecordV1 {
             // V1 account can't be resized and we have to translate it back to the original format
             let vote_weight = match &self.vote {
                 Vote::Approve(_options) => VoteWeightV1::Yes(self.voter_weight),
@@ -124,11 +124,11 @@ pub fn get_vote_record_data(
     program_id: &Pubkey,
     vote_record_info: &AccountInfo,
 ) -> Result<VoteRecordV2, ProgramError> {
-    let account_type: GovernanceAccountType =
+    let account_type: ShihonAccountType =
         try_from_slice_unchecked(&vote_record_info.data.borrow())?;
 
     // If the account is V1 version then translate to V2
-    if account_type == GovernanceAccountType::VoteRecordV1 {
+    if account_type == ShihonAccountType::VoteRecordV1 {
         let vote_record_data_v1 = get_account_data::<VoteRecordV1>(program_id, vote_record_info)?;
 
         let (vote, voter_weight) = match vote_record_data_v1.vote_weight {
@@ -198,60 +198,4 @@ pub fn get_vote_record_address<'a>(
         program_id,
     )
     .0
-}
-
-#[cfg(test)]
-mod test {
-
-    use borsh::BorshSerialize;
-    use solana_program::clock::Epoch;
-
-    use super::*;
-
-    #[test]
-    fn test_vote_record_v1_to_v2_serialisation_roundtrip() {
-        // Arrange
-
-        let vote_record_v1_source = VoteRecordV1 {
-            account_type: GovernanceAccountType::VoteRecordV1,
-            proposal: Pubkey::new_unique(),
-            governing_token_owner: Pubkey::new_unique(),
-            is_relinquished: true,
-            vote_weight: VoteWeightV1::Yes(120),
-        };
-
-        let mut account_data = vec![];
-        vote_record_v1_source.serialize(&mut account_data).unwrap();
-
-        let program_id = Pubkey::new_unique();
-
-        let info_key = Pubkey::new_unique();
-        let mut lamports = 10u64;
-
-        let account_info = AccountInfo::new(
-            &info_key,
-            false,
-            false,
-            &mut lamports,
-            &mut account_data[..],
-            &program_id,
-            false,
-            Epoch::default(),
-        );
-
-        // Act
-
-        let vote_record_v2 = get_vote_record_data(&program_id, &account_info).unwrap();
-
-        vote_record_v2
-            .serialize(&mut &mut **account_info.data.borrow_mut())
-            .unwrap();
-
-        // Assert
-
-        let vote_record_v1_target =
-            get_account_data::<VoteRecordV1>(&program_id, &account_info).unwrap();
-
-        assert_eq!(vote_record_v1_source, vote_record_v1_target)
-    }
 }

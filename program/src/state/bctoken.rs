@@ -1,11 +1,14 @@
 use crate::PROGRAM_AUTHORITY_SEED;
-use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::clock::{Slot, UnixTimestamp};
+use solana_program::clock::UnixTimestamp;
+
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
-    program_error::ProgramError,
-    program_pack::{IsInitialized, Pack, Sealed},
+    account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,
     pubkey::Pubkey,
 };
+use spl_governance_tools::account::{assert_is_valid_account, get_account_data, AccountMaxSize};
+
+use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
 
 pub struct BcToken {
     pub is_initialized: bool,
@@ -23,10 +26,6 @@ impl IsInitialized for BcToken {
         self.is_initialized
     }
 }
-
-impl Sealed for BcToken {}
-
-impl BcToken {}
 
 /// Returns bcToken PDA seeds
 pub fn get_bc_token_address_seeds(name: &str) -> [&[u8]; 2] {
@@ -63,27 +62,10 @@ pub fn get_bc_token_holding_address(
     .0
 }
 
-
-
-//! Realm Account
-
-use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
-    account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,
-    pubkey::Pubkey,
-};
-use spl_governance_tools::account::{assert_is_valid_account, get_account_data, AccountMaxSize};
-
-use crate::{
-    error::ShihonError,
-    state::enums::{GovernanceAccountType, MintMaxVoteWeightSource},
-    PROGRAM_AUTHORITY_SEED,
-};
-
-/// Realm Config instruction args
+/// bcToken Config instruction args
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct RealmConfigArgs {
+pub struct BcTokenConfigArgs {
     /// Indicates whether council_mint should be used
     /// If yes then council_mint account must also be passed to the instruction
     pub use_council_mint: bool,
@@ -125,7 +107,7 @@ pub struct RealmConfig {
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct Realm {
     /// Governance account type
-    pub account_type: GovernanceAccountType,
+    pub account_type: ShihonAccountType,
 
     /// Community mint
     pub community_mint: Pubkey,
@@ -152,7 +134,7 @@ impl AccountMaxSize for Realm {
 
 impl IsInitialized for Realm {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::Realm
+        self.account_type == ShihonAccountType::
     }
 }
 
@@ -214,7 +196,7 @@ pub fn assert_is_valid_realm(
     program_id: &Pubkey,
     realm_info: &AccountInfo,
 ) -> Result<(), ProgramError> {
-    assert_is_valid_account(realm_info, GovernanceAccountType::Realm, program_id)
+    assert_is_valid_account(realm_info, ShihonAccountType::Realm, program_id)
 }
 
 /// Deserializes account and checks owner program
@@ -308,105 +290,3 @@ pub fn assert_valid_realm_config_args(config_args: &RealmConfigArgs) -> Result<(
     Ok(())
 }
 
-#[cfg(test)]
-mod test {
-
-    use crate::{
-        instruction::GovernanceInstruction,
-        state::legacy::{GovernanceInstructionV1, RealmConfigV1, RealmV1},
-    };
-    use solana_program::borsh::try_from_slice_unchecked;
-
-    use super::*;
-
-    #[test]
-    fn test_max_size() {
-        let realm = Realm {
-            account_type: GovernanceAccountType::Realm,
-            community_mint: Pubkey::new_unique(),
-            reserved: [0; 8],
-
-            authority: Some(Pubkey::new_unique()),
-            name: "test-realm".to_string(),
-            config: RealmConfig {
-                council_mint: Some(Pubkey::new_unique()),
-                use_community_voter_weight_addin: false,
-                reserved: [0; 7],
-
-                community_mint_max_vote_weight_source: MintMaxVoteWeightSource::Absolute(100),
-                min_community_tokens_to_create_governance: 10,
-            },
-        };
-
-        let size = realm.try_to_vec().unwrap().len();
-
-        assert_eq!(realm.get_max_size(), Some(size));
-    }
-
-    #[test]
-    fn test_deserialize_v2_realm_account_from_v1() {
-        // Arrange
-        let realm_v1 = RealmV1 {
-            account_type: GovernanceAccountType::Realm,
-            community_mint: Pubkey::new_unique(),
-            config: RealmConfigV1 {
-                council_mint: Some(Pubkey::new_unique()),
-                reserved: [0; 8],
-                community_mint_max_vote_weight_source: MintMaxVoteWeightSource::Absolute(100),
-                min_community_tokens_to_create_governance: 10,
-            },
-            reserved: [0; 8],
-            authority: Some(Pubkey::new_unique()),
-            name: "test-realm-v1".to_string(),
-        };
-
-        let mut realm_v1_data = vec![];
-        realm_v1.serialize(&mut realm_v1_data).unwrap();
-
-        // Act
-        let realm_v2: Realm = try_from_slice_unchecked(&realm_v1_data).unwrap();
-
-        // Assert
-        assert!(!realm_v2.config.use_community_voter_weight_addin);
-        assert_eq!(realm_v2.account_type, GovernanceAccountType::Realm);
-        assert_eq!(
-            realm_v2.config.min_community_tokens_to_create_governance,
-            realm_v1.config.min_community_tokens_to_create_governance,
-        );
-    }
-
-    #[test]
-    fn test_deserialize_v1_create_realm_instruction_from_v2() {
-        // Arrange
-        let create_realm_ix_v2 = GovernanceInstruction::CreateRealm {
-            name: "test-realm".to_string(),
-            config_args: RealmConfigArgs {
-                use_council_mint: true,
-                min_community_tokens_to_create_governance: 100,
-                community_mint_max_vote_weight_source:
-                    MintMaxVoteWeightSource::FULL_SUPPLY_FRACTION,
-                use_community_voter_weight_addin: false,
-            },
-        };
-
-        let mut create_realm_ix_data = vec![];
-        create_realm_ix_v2
-            .serialize(&mut create_realm_ix_data)
-            .unwrap();
-
-        // Act
-        let create_realm_ix_v1: GovernanceInstructionV1 =
-            try_from_slice_unchecked(&create_realm_ix_data).unwrap();
-
-        // Assert
-        if let GovernanceInstructionV1::CreateRealm { name, config_args } = create_realm_ix_v1 {
-            assert_eq!("test-realm", name);
-            assert_eq!(
-                MintMaxVoteWeightSource::FULL_SUPPLY_FRACTION,
-                config_args.community_mint_max_vote_weight_source
-            );
-        } else {
-            panic!("Can't deserialize v1 CreateRealm instruction from v2");
-        }
-    }
-}

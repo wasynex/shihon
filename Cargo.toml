@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "program",
+    "tools",
+    "token/program",
+]

@@ -35,7 +35,7 @@ impl IsInitialized for Tanistry {
 use crate::{
     error::ShihonError,
     state::{
-        enums::{GovernanceAccountType, VoteThresholdPercentage, VoteWeightSource},
+        enums::{ShihonAccountType, VoteThresholdPercentage, VoteWeightSource},
         realm::assert_is_valid_realm,
     },
 };
@@ -84,7 +84,7 @@ pub struct GovernanceConfig {
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct Governance {
     /// Account type. It can be Uninitialized, AccountGovernance or ProgramGovernance
-    pub account_type: GovernanceAccountType,
+    pub account_type: ShihonAccountType,
 
     /// Governance Realm
     pub realm: Pubkey,
@@ -106,10 +106,10 @@ impl AccountMaxSize for Governance {}
 
 impl IsInitialized for Governance {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::AccountGovernance
-            || self.account_type == GovernanceAccountType::ProgramGovernance
-            || self.account_type == GovernanceAccountType::MintGovernance
-            || self.account_type == GovernanceAccountType::TokenGovernance
+        self.account_type == ShihonAccountType::AccountGovernance
+            || self.account_type == ShihonAccountType::ProgramGovernance
+            || self.account_type == ShihonAccountType::MintGovernance
+            || self.account_type == ShihonAccountType::TokenGovernance
     }
 }
 
@@ -117,16 +117,16 @@ impl Governance {
     /// Returns Governance PDA seeds
     pub fn get_governance_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
         let seeds = match self.account_type {
-            GovernanceAccountType::AccountGovernance => {
+            ShihonAccountType::AccountGovernance => {
                 get_account_governance_address_seeds(&self.realm, &self.governed_account)
             }
-            GovernanceAccountType::ProgramGovernance => {
+            ShihonAccountType::ProgramGovernance => {
                 get_program_governance_address_seeds(&self.realm, &self.governed_account)
             }
-            GovernanceAccountType::MintGovernance => {
+            ShihonAccountType::MintGovernance => {
                 get_mint_governance_address_seeds(&self.realm, &self.governed_account)
             }
-            GovernanceAccountType::TokenGovernance => {
+            ShihonAccountType::TokenGovernance => {
                 get_token_governance_address_seeds(&self.realm, &self.governed_account)
             }
             _ => return Err(GovernanceToolsError::InvalidAccountType.into()),
@@ -275,10 +275,10 @@ pub fn assert_is_valid_governance(
     assert_is_valid_account2(
         governance_info,
         &[
-            GovernanceAccountType::AccountGovernance,
-            GovernanceAccountType::ProgramGovernance,
-            GovernanceAccountType::TokenGovernance,
-            GovernanceAccountType::MintGovernance,
+            ShihonAccountType::AccountGovernance,
+            ShihonAccountType::ProgramGovernance,
+            ShihonAccountType::TokenGovernance,
+            ShihonAccountType::MintGovernance,
         ],
         program_id,
     )

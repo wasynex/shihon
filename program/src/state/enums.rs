@@ -38,36 +38,44 @@ impl Default for ShihonAccountType {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum BcTokenState {
-    /// before creating bcToken
+    /// bcToken before content itself reachs to Oracle
     Draft,
-
-    /// just for holding own content when reached to Oracle
-    Private,
-
-    /// for casting own content for waiting a KickerCoin
-    Public,
-
-    /// enable to candidate on Tanistry
-    Executing,
-
-    /// Voting ended with success
-    Succeeded,
-
-    /// Enable to refund
-    Completed,
-
-    /// Cancelled
-    Cancelled,
 
     /// some error happened when created
     ExecutingWithErrors,
 
-    /// Taking votes
-    Voting,
+    /// just for holding own content in his wallet when its content has reached to Oracle
+    Private,
+
+    /// for casting own content on public for waiting a KickerCoin by kicker
+    Public,
+
+    /// enable to candidate on Tanistry because coordinator has approved KickerCoin
+    Executing,
+
+    /// enable to vote for CC because minimum number of round has done
+    EnableToVote,
+
+    /// Enable to refund because everything has finished
+    Completed,
+
+    /// when holder has cancelled to turn it to private
+    Cancelled,
 }
 
 impl Default for BcTokenState {
     fn default() -> Self {
         BcTokenState::Draft
     }
+}
+
+/// The source of vote for CC
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+pub enum VoteSource {
+    // Which Ring you Vote
+    Transit,
+
+    ///Pull type: Which push or pull
+    Snapshot,
 }

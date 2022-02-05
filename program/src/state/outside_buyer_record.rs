@@ -8,7 +8,7 @@ use crate::{
     },
     error::ShihonError,
     state::{
-        enums::GovernanceAccountType, governance::GovernanceConfig, realm::Realm,
+        enums::ShihonAccountType, governance::GovernanceConfig, realm::Realm,
         realm_config::get_realm_config_data_for_realm,
     },
     PROGRAM_AUTHORITY_SEED,
@@ -29,7 +29,7 @@ use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct TokenOwnerRecord {
     /// Governance account type
-    pub account_type: GovernanceAccountType,
+    pub account_type: ShihonAccountType,
 
     /// The Realm the TokenOwnerRecord belongs to
     pub realm: Pubkey,
@@ -75,7 +75,7 @@ impl AccountMaxSize for TokenOwnerRecord {
 
 impl IsInitialized for TokenOwnerRecord {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::TokenOwnerRecord
+        self.account_type == ShihonAccountType::TokenOwnerRecord
     }
 }
 
@@ -304,87 +304,4 @@ pub fn get_token_owner_record_data_for_proposal_owner(
     }
 
     get_token_owner_record_data(program_id, token_owner_record_info)
-}
-
-#[cfg(test)]
-mod test {
-    use solana_program::borsh::{get_packed_len, try_from_slice_unchecked};
-
-    use super::*;
-
-    #[test]
-    fn test_max_size() {
-        let token_owner_record = TokenOwnerRecord {
-            account_type: GovernanceAccountType::TokenOwnerRecord,
-            realm: Pubkey::new_unique(),
-            governing_token_mint: Pubkey::new_unique(),
-            governing_token_owner: Pubkey::new_unique(),
-            governing_token_deposit_amount: 10,
-            governance_delegate: Some(Pubkey::new_unique()),
-            unrelinquished_votes_count: 1,
-            total_votes_count: 1,
-            outstanding_proposal_count: 1,
-            reserved: [0; 7],
-        };
-
-        let size = get_packed_len::<TokenOwnerRecord>();
-
-        assert_eq!(token_owner_record.get_max_size(), Some(size));
-    }
-
-    #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-    pub struct TokenOwnerRecordV1 {
-        pub account_type: GovernanceAccountType,
-
-        pub realm: Pubkey,
-
-        pub governing_token_mint: Pubkey,
-
-        pub governing_token_owner: Pubkey,
-
-        pub governing_token_deposit_amount: u64,
-
-        pub unrelinquished_votes_count: u32,
-
-        pub total_votes_count: u32,
-
-        pub reserved: [u8; 8],
-
-        pub governance_delegate: Option<Pubkey>,
-    }
-
-    #[test]
-    fn test_deserialize_v1_0_account() {
-        let token_owner_record_v1_0 = TokenOwnerRecordV1 {
-            account_type: GovernanceAccountType::TokenOwnerRecord,
-            realm: Pubkey::new_unique(),
-            governing_token_mint: Pubkey::new_unique(),
-            governing_token_owner: Pubkey::new_unique(),
-            governing_token_deposit_amount: 10,
-            unrelinquished_votes_count: 2,
-            total_votes_count: 5,
-            reserved: [0; 8],
-            governance_delegate: Some(Pubkey::new_unique()),
-        };
-
-        let mut token_owner_record_v1_0_data = vec![];
-        token_owner_record_v1_0
-            .serialize(&mut token_owner_record_v1_0_data)
-            .unwrap();
-
-        let token_owner_record_v1_1_data: TokenOwnerRecord =
-            try_from_slice_unchecked(&token_owner_record_v1_0_data).unwrap();
-
-        assert_eq!(
-            token_owner_record_v1_0.account_type,
-            token_owner_record_v1_1_data.account_type
-        );
-
-        assert_eq!(0, token_owner_record_v1_1_data.outstanding_proposal_count);
-
-        assert_eq!(
-            token_owner_record_v1_0.governance_delegate,
-            token_owner_record_v1_1_data.governance_delegate
-        );
-    }
 }
