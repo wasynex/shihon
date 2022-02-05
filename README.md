@@ -8,7 +8,7 @@ It's a new tool for finding these completely new and awesome combinations in a s
 
 ## Developer's Guide
 
-For a more detailed explanation, see [documents](https://docs.shihonics.com)
+For a more detailed explanation, see [documents](https://docs.shihon.org)
 
 ![](img/shihongif.gif)
 
