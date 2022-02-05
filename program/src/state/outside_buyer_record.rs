@@ -6,7 +6,7 @@ use crate::{
     addins::voter_weight::{
         get_voter_weight_record_data_for_token_owner_record, VoterWeightAction,
     },
-    error::GovernanceError,
+    error::ShihonError,
     state::{
         enums::GovernanceAccountType, governance::GovernanceConfig, realm::Realm,
         realm_config::get_realm_config_data_for_realm,
@@ -97,7 +97,7 @@ impl TokenOwnerRecord {
             };
         }
 
-        Err(GovernanceError::GoverningTokenOwnerOrDelegateMustSign.into())
+        Err(ShihonError::GoverningTokenOwnerOrDelegateMustSign.into())
     }
 
     /// Asserts TokenOwner has enough tokens to be allowed to create proposal and doesn't have any outstanding proposals
@@ -113,17 +113,17 @@ impl TokenOwnerRecord {
             } else if Some(self.governing_token_mint) == realm_data.config.council_mint {
                 config.min_council_tokens_to_create_proposal
             } else {
-                return Err(GovernanceError::InvalidGoverningTokenMint.into());
+                return Err(ShihonError::InvalidGoverningTokenMint.into());
             };
 
         if voter_weight < min_weight_to_create_proposal {
-            return Err(GovernanceError::NotEnoughTokensToCreateProposal.into());
+            return Err(ShihonError::NotEnoughTokensToCreateProposal.into());
         }
 
         // The number of outstanding proposals is currently restricted to 10
         // If there is a need to change it in the future then it should be added to realm or governance config
         if self.outstanding_proposal_count >= 10 {
-            return Err(GovernanceError::TooManyOutstandingProposals.into());
+            return Err(ShihonError::TooManyOutstandingProposals.into());
         }
 
         Ok(())
@@ -142,11 +142,11 @@ impl TokenOwnerRecord {
                 // For council tokens it's enough to be in possession of any number of tokens
                 1
             } else {
-                return Err(GovernanceError::InvalidGoverningTokenMint.into());
+                return Err(ShihonError::InvalidGoverningTokenMint.into());
             };
 
         if voter_weight < min_weight_to_create_governance {
-            return Err(GovernanceError::NotEnoughTokensToCreateGovernance.into());
+            return Err(ShihonError::NotEnoughTokensToCreateGovernance.into());
         }
 
         Ok(())
@@ -155,15 +155,11 @@ impl TokenOwnerRecord {
     /// Asserts TokenOwner can withdraw tokens from Realm
     pub fn assert_can_withdraw_governing_tokens(&self) -> Result<(), ProgramError> {
         if self.unrelinquished_votes_count > 0 {
-            return Err(
-                GovernanceError::AllVotesMustBeRelinquishedToWithdrawGoverningTokens.into(),
-            );
+            return Err(ShihonError::AllVotesMustBeRelinquishedToWithdrawGoverningTokens.into());
         }
 
         if self.outstanding_proposal_count > 0 {
-            return Err(
-                GovernanceError::AllProposalsMustBeFinalisedToWithdrawGoverningTokens.into(),
-            );
+            return Err(ShihonError::AllProposalsMustBeFinalisedToWithdrawGoverningTokens.into());
         }
 
         Ok(())
@@ -259,7 +255,7 @@ pub fn get_token_owner_record_data_for_seeds(
         Pubkey::find_program_address(token_owner_record_seeds, program_id);
 
     if token_owner_record_address != *token_owner_record_info.key {
-        return Err(GovernanceError::InvalidTokenOwnerRecordAccountAddress.into());
+        return Err(ShihonError::InvalidTokenOwnerRecordAccountAddress.into());
     }
 
     get_token_owner_record_data(program_id, token_owner_record_info)
@@ -274,7 +270,7 @@ pub fn get_token_owner_record_data_for_realm(
     let token_owner_record_data = get_token_owner_record_data(program_id, token_owner_record_info)?;
 
     if token_owner_record_data.realm != *realm {
-        return Err(GovernanceError::InvalidRealmForTokenOwnerRecord.into());
+        return Err(ShihonError::InvalidRealmForTokenOwnerRecord.into());
     }
 
     Ok(token_owner_record_data)
@@ -291,7 +287,7 @@ pub fn get_token_owner_record_data_for_realm_and_governing_mint(
         get_token_owner_record_data_for_realm(program_id, token_owner_record_info, realm)?;
 
     if token_owner_record_data.governing_token_mint != *governing_token_mint {
-        return Err(GovernanceError::InvalidGoverningMintForTokenOwnerRecord.into());
+        return Err(ShihonError::InvalidGoverningMintForTokenOwnerRecord.into());
     }
 
     Ok(token_owner_record_data)
@@ -304,7 +300,7 @@ pub fn get_token_owner_record_data_for_proposal_owner(
     proposal_owner: &Pubkey,
 ) -> Result<TokenOwnerRecord, ProgramError> {
     if token_owner_record_info.key != proposal_owner {
-        return Err(GovernanceError::InvalidProposalOwnerAccount.into());
+        return Err(ShihonError::InvalidProposalOwnerAccount.into());
     }
 
     get_token_owner_record_data(program_id, token_owner_record_info)

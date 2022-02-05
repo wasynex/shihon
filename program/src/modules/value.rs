@@ -1,29 +1,29 @@
 /// for showing the lamports amount
 
-fn show_self_rate_value() -> u64 {
+fn get_self_rate_value() -> u64 {
     unimplemented!();
 }
 
-fn show_sellout_value() -> u64 {
+fn get_sellout_value() -> u64 {
     unimplemented!();
 }
 
-fn show_enable_sell_value() -> u64 {
+fn get_enable_sell_value() -> u64 {
     unimplemented!();
 }
-
-fn show_tanistry_value() -> u64 {
+/// sum of members of one tanistry
+fn get_tanistry_value() -> u64 {
     unimplemented!();
 }
 /// sum of 1,3,5 of tanistry value
-fn show_building_value() -> u64 {
+fn get_building_value() -> u64 {
     unimplemented!();
 }
 /// sum of both wallet (α + β)
-fn show_ring_value() -> u64 {
+fn get_ring_value() -> u64 {
     unimplemented!();
 }
 
-fn show_cc_value() -> u64 {
+fn get_cc_value() -> u64 {
     unimplemented!();
 }

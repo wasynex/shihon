@@ -33,7 +33,7 @@ impl IsInitialized for Tanistry {
 //! Governance Account
 
 use crate::{
-    error::GovernanceError,
+    error::ShihonError,
     state::{
         enums::{GovernanceAccountType, VoteThresholdPercentage, VoteWeightSource},
         realm::assert_is_valid_realm,
@@ -153,7 +153,7 @@ pub fn get_governance_data_for_realm(
     let governance_data = get_governance_data(program_id, governance_info)?;
 
     if governance_data.realm != *realm {
-        return Err(GovernanceError::InvalidRealmForGovernance.into());
+        return Err(ShihonError::InvalidRealmForGovernance.into());
     }
 
     Ok(governance_data)
@@ -304,20 +304,20 @@ pub fn assert_is_valid_governance_config(
     match governance_config.vote_threshold_percentage {
         VoteThresholdPercentage::YesVote(yes_vote_threshold_percentage) => {
             if !(1..=100).contains(&yes_vote_threshold_percentage) {
-                return Err(GovernanceError::InvalidVoteThresholdPercentage.into());
+                return Err(ShihonError::InvalidVoteThresholdPercentage.into());
             }
         }
         _ => {
-            return Err(GovernanceError::VoteThresholdPercentageTypeNotSupported.into());
+            return Err(ShihonError::VoteThresholdPercentageTypeNotSupported.into());
         }
     }
 
     if governance_config.vote_weight_source != VoteWeightSource::Deposit {
-        return Err(GovernanceError::VoteWeightSourceNotSupported.into());
+        return Err(ShihonError::VoteWeightSourceNotSupported.into());
     }
 
     if governance_config.proposal_cool_off_time > 0 {
-        return Err(GovernanceError::ProposalCoolOffTimeNotSupported.into());
+        return Err(ShihonError::ProposalCoolOffTimeNotSupported.into());
     }
 
     Ok(())

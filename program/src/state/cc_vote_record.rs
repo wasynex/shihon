@@ -10,7 +10,7 @@ use solana_program::program_error::ProgramError;
 use solana_program::{program_pack::IsInitialized, pubkey::Pubkey};
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::error::GovernanceError;
+use crate::error::ShihonError;
 
 use crate::PROGRAM_AUTHORITY_SEED;
 
@@ -38,7 +38,7 @@ impl VoteChoice {
         Ok(match self.weight_percentage {
             100 => voter_weight,
             0 => 0,
-            _ => return Err(GovernanceError::InvalidVoteChoiceWeightPercentage.into()),
+            _ => return Err(ShihonError::InvalidVoteChoiceWeightPercentage.into()),
         })
     }
 }
@@ -87,7 +87,7 @@ impl VoteRecordV2 {
     /// Checks the vote can be relinquished
     pub fn assert_can_relinquish_vote(&self) -> Result<(), ProgramError> {
         if self.is_relinquished {
-            return Err(GovernanceError::VoteAlreadyRelinquished.into());
+            return Err(ShihonError::VoteAlreadyRelinquished.into());
         }
 
         Ok(())
@@ -165,11 +165,11 @@ pub fn get_vote_record_data_for_proposal_and_token_owner(
     let vote_record_data = get_vote_record_data(program_id, vote_record_info)?;
 
     if vote_record_data.proposal != *proposal {
-        return Err(GovernanceError::InvalidProposalForVoterRecord.into());
+        return Err(ShihonError::InvalidProposalForVoterRecord.into());
     }
 
     if vote_record_data.governing_token_owner != *governing_token_owner {
-        return Err(GovernanceError::InvalidGoverningTokenOwnerForVoteRecord.into());
+        return Err(ShihonError::InvalidGoverningTokenOwnerForVoteRecord.into());
     }
 
     Ok(vote_record_data)
