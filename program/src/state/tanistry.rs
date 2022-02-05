@@ -1,36 +1,4 @@
-use crate::PROGRAM_AUTHORITY_SEED;
-use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::clock::{Slot, UnixTimestamp};
-use solana_program::{
-    program_error::ProgramError,
-    program_pack::{IsInitialized, Pack, Sealed},
-    pubkey::Pubkey,
-};
-
-pub struct Tanistry {
-    pub is_initialized: bool,
-    pub kicker_pubkey: Pubkey,
-    pub temp_token_account_pubkey: Pubkey,
-    pub kicker_token_to_receive_account_pubkey: Pubkey,
-    pub next_tanistry_id: Option<Pubkey>,
-    pub previous_tanistry_id: Option<Pubkey>,
-    pub rating_list: [&Rate],
-    pub number_of_round: u64,
-    pub building_key: Vec<u8>,
-    pub iterator_of_forward_for_minting: u64,
-}
-
-impl Sealed for Tanistry {}
-
-impl IsInitialized for Tanistry {
-    fn is_initialized(&self) -> bool {
-        self.is_initialized
-    }
-}
-
-
-
-//! Governance Account
+//! Tanistry Account
 
 use crate::{
     error::ShihonError,
@@ -49,7 +17,15 @@ use spl_governance_tools::{
     error::GovernanceToolsError,
 };
 
-/// Governance config
+pub struct Tanistry {}
+
+impl IsInitialized for Tanistry {
+    fn is_initialized(&self) -> bool {
+        self.is_initialized
+    }
+}
+
+/// Tanistry config
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct GovernanceConfig {
@@ -79,11 +55,21 @@ pub struct GovernanceConfig {
     pub min_council_tokens_to_create_proposal: u64,
 }
 
-/// Governance Account
+/// Tanistry Account
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct Governance {
-    /// Account type. It can be Uninitialized, AccountGovernance or ProgramGovernance
+pub struct Tanistry {
+    pub is_initialized: bool,
+    pub kicker_pubkey: Pubkey,
+    pub temp_token_account_pubkey: Pubkey,
+    pub kicker_token_to_receive_account_pubkey: Pubkey,
+    pub next_tanistry_id: Option<Pubkey>,
+    pub previous_tanistry_id: Option<Pubkey>,
+    pub rating_list: [&Rate],
+    pub number_of_round: u64,
+    pub building_key: Vec<u8>,
+    pub iterator_of_forward_for_minting: u64,
+
     pub account_type: ShihonAccountType,
 
     /// Governance Realm
