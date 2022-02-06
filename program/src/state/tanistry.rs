@@ -17,8 +17,6 @@ use spl_governance_tools::{
     error::GovernanceToolsError,
 };
 
-
-
 /// Tanistry config
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
@@ -128,8 +126,8 @@ pub fn get_tanistry_data_for_bc_token(
 /// Checks the given account is a governance account and belongs to the given realm
 pub fn assert_governance_for_realm(
     program_id: &Pubkey,
-    governance_info: &AccountInfo,
-    realm: &Pubkey,
+    tanistry_info: &AccountInfo,
+    bc_token: &Pubkey,
 ) -> Result<(), ProgramError> {
     get_tanistry_data_for_bc_token(program_id, tanistry_info, bc_token)?;
     Ok(())
@@ -137,26 +135,26 @@ pub fn assert_governance_for_realm(
 
 /// Returns Tanistry PDA seeds
 pub fn get_program_tanistry_address_seeds<'a>(
-    realm: &'a Pubkey,
-    governed_program: &'a Pubkey,
+    bc_token: &'a Pubkey,
+    tanistry_program: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     // 'program-governance' prefix ensures uniqueness of the PDA
     // Note: Only the current program upgrade authority can create an account with this PDA using CreateProgramGovernance instruction
     [
-        b"program-governance",
-        realm.as_ref(),
-        governed_program.as_ref(),
+        b"program-tanistry",
+        bc_token.as_ref(),
+        tanistry_program.as_ref(),
     ]
 }
 
 /// Returns ProgramGovernance PDA address
 pub fn get_program_tanistry_address<'a>(
     program_id: &Pubkey,
-    realm: &'a Pubkey,
-    governed_program: &'a Pubkey,
+    bc_token: &'a Pubkey,
+    tanistry_program: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_program_tanistry_address_seeds(realm, governed_program),
+        &get_program_tanistry_address_seeds(bc_token, tanistry_program),
         program_id,
     )
     .0
@@ -164,22 +162,22 @@ pub fn get_program_tanistry_address<'a>(
 
 /// Returns MintTanistry PDA seeds
 pub fn get_mint_tanistry_address_seeds<'a>(
-    realm: &'a Pubkey,
-    governed_mint: &'a Pubkey,
+    bc_token: &'a Pubkey,
+    tanistry_mint: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     // 'mint-governance' prefix ensures uniqueness of the PDA
     // Note: Only the current mint authority can create an account with this PDA using CreateMintGovernance instruction
-    [b"mint-governance", realm.as_ref(), governed_mint.as_ref()]
+    [b"mint-tanistry", bc_token.as_ref(), tanistry_mint.as_ref()]
 }
 
 /// Returns MintTanistry PDA address
 pub fn get_mint_tanistry_address<'a>(
     program_id: &Pubkey,
-    realm: &'a Pubkey,
-    governed_mint: &'a Pubkey,
+    bc_token: &'a Pubkey,
+    tanistry_mint: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_mint_tanistry_address_seeds(realm, governed_mint),
+        &get_mint_tanistry_address_seeds(bc_token, tanistry_mint),
         program_id,
     )
     .0
@@ -187,12 +185,16 @@ pub fn get_mint_tanistry_address<'a>(
 
 /// Returns TokenGovernance PDA seeds
 pub fn get_token_tanistry_address_seeds<'a>(
-    realm: &'a Pubkey,
-    governed_token: &'a Pubkey,
+    bc_token: &'a Pubkey,
+    tanistry_token: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     // 'token-governance' prefix ensures uniqueness of the PDA
     // Note: Only the current token account owner can create an account with this PDA using CreateTokenGovernance instruction
-    [b"token-governance", realm.as_ref(), governed_token.as_ref()]
+    [
+        b"token-tanistry",
+        bc_token.as_ref(),
+        tanistry_token.as_ref(),
+    ]
 }
 
 /// Returns TokenTanistry PDA address
@@ -236,10 +238,10 @@ pub fn get_account_tanistry_address<'a>(
 /// Checks whether tanistry account exists, is initialized and owned by the Tanistry program
 pub fn assert_is_valid_tanistry(
     program_id: &Pubkey,
-    governance_info: &AccountInfo,
+    tanistry_info: &AccountInfo,
 ) -> Result<(), ProgramError> {
     assert_is_valid_account2(
-        governance_info,
+        tanistry_info,
         &[
             ShihonAccountType::AccountGovernance,
             ShihonAccountType::ProgramGovernance,
@@ -250,24 +252,24 @@ pub fn assert_is_valid_tanistry(
     )
 }
 
-/// Validates args supplied to create governance account
-pub fn assert_valid_create_governance_args(
+/// Validates args supplied to create tanistry account
+pub fn assert_valid_create_tanistry_args(
     program_id: &Pubkey,
-    governance_config: &GovernanceConfig,
-    realm_info: &AccountInfo,
+    tanistry_config: &TanistryConfig,
+    bc_token_info: &AccountInfo,
 ) -> Result<(), ProgramError> {
-    assert_is_valid_realm(program_id, realm_info)?;
+    assert_is_valid_bc_token(program_id, bc_token_info)?;
 
-    assert_is_valid_governance_config(governance_config)?;
+    assert_is_valid_tanistry_config(tanistry_config)?;
 
     Ok(())
 }
 
-/// Validates governance config parameters
-pub fn assert_is_valid_governance_config(
-    governance_config: &GovernanceConfig,
+/// Validates tanistry config parameters
+pub fn assert_is_valid_tanistry_config(
+    tanistry_config: &TanistryConfig,
 ) -> Result<(), ProgramError> {
-    match governance_config.vote_threshold_percentage {
+    match tanistry_config.vote_threshold_percentage {
         VoteThresholdPercentage::YesVote(yes_vote_threshold_percentage) => {
             if !(1..=100).contains(&yes_vote_threshold_percentage) {
                 return Err(ShihonError::InvalidVoteThresholdPercentage.into());
@@ -278,11 +280,11 @@ pub fn assert_is_valid_governance_config(
         }
     }
 
-    if governance_config.vote_weight_source != VoteWeightSource::Deposit {
+    if tanistry_config.vote_weight_source != VoteWeightSource::Deposit {
         return Err(ShihonError::VoteWeightSourceNotSupported.into());
     }
 
-    if governance_config.proposal_cool_off_time > 0 {
+    if tanistry_config.proposal_cool_off_time > 0 {
         return Err(ShihonError::ProposalCoolOffTimeNotSupported.into());
     }
 

@@ -38,26 +38,29 @@ impl Default for ShihonAccountType {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum BcTokenState {
-    /// bcToken before content itself reachs to Oracle
-    Draft,
+    /// bcToken before content itself reaches to Oracle
+    DraftBlankCheck,
 
     /// some error happened when created
     ExecutingWithErrors,
 
     /// just for holding own content in his wallet when its content has reached to Oracle
-    Private,
+    PrivateForHolding,
 
     /// for casting own content on public for waiting a KickerCoin by kicker
-    Public,
+    PublicOnTheGround,
 
     /// enable to candidate on Tanistry because coordinator has approved KickerCoin
-    Executing,
+    EnableToCandidate,
+
+    /// Deadline for candidates
+    TanistrySetIn,
 
     /// enable to vote for CC because minimum number of round has done
-    EnableToVote,
+    EnableToVoteToCC,
 
     /// Enable to refund because everything has finished
-    Completed,
+    EnableToRefund,
 
     /// when holder has cancelled to turn it to private
     Cancelled,
@@ -65,7 +68,7 @@ pub enum BcTokenState {
 
 impl Default for BcTokenState {
     fn default() -> Self {
-        BcTokenState::Draft
+        BcTokenState::DraftBlankCheck
     }
 }
 

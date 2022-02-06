@@ -8,7 +8,7 @@ use crate::{
     },
     error::ShihonError,
     state::{
-        enums::ShihonAccountType, governance::GovernanceConfig, realm::Realm,
+        bc_token::BcToken, enums::ShihonAccountType, governance::GovernanceConfig, realm::Realm,
         realm_config::get_realm_config_data_for_realm,
     },
     PROGRAM_AUTHORITY_SEED,
@@ -61,40 +61,34 @@ impl IsInitialized for OutsideBuyerRecord {
 ///TODO: not yet fix this associated functions
 impl OutsideBuyerRecord {
     /// Checks whether the provided exceeded rating token Authority signed transaction
-    pub fn assert_token_owner_or_delegate_is_signer(
+    pub fn assert_outside_buyer_token_owner(
         &self,
-        governance_authority_info: &AccountInfo,
+        outside_buyer_authority_info: &AccountInfo,
     ) -> Result<(), ProgramError> {
-        if governance_authority_info.is_signer {
-            if &self.governing_token_owner == governance_authority_info.key {
+        if outside_buyer_authority_info.is_signer {
+            if &self.outside_buyer_token_owner == outside_buyer_authority_info.key {
                 return Ok(());
             }
-
-            if let Some(governance_delegate) = self.governance_delegate {
-                if &governance_delegate == governance_authority_info.key {
-                    return Ok(());
-                }
-            };
         }
-
         Err(ShihonError::GoverningTokenOwnerOrDelegateMustSign.into())
     }
 
     /// Asserts TokenOwner has enough tokens to be allowed to create proposal and doesn't have any outstanding proposals
-    pub fn assert_can_create_proposal(
+    pub fn assert_can_buy_exceeded_rating_token(
         &self,
-        realm_data: &Realm,
+        bc_token_data: &BcToken,
         config: &GovernanceConfig,
         voter_weight: u64,
     ) -> Result<(), ProgramError> {
-        let min_weight_to_create_proposal =
-            if self.governing_token_mint == realm_data.community_mint {
-                config.min_community_tokens_to_create_proposal
-            } else if Some(self.governing_token_mint) == realm_data.config.council_mint {
-                config.min_council_tokens_to_create_proposal
-            } else {
-                return Err(ShihonError::InvalidGoverningTokenMint.into());
-            };
+        let min_weight_to_create_proposal = if self.outside_buyer_token_mint
+            == bc_token_data.community_mint
+        {
+            config.min_community_tokens_to_create_proposal
+        } else if Some(self.outside_buyer_token_mint) == bc_token_data.config.outside_buyer_mint {
+            config.min_council_tokens_to_create_proposal
+        } else {
+            return Err(ShihonError::InvalidGoverningTokenMint.into());
+        };
 
         if voter_weight < min_weight_to_create_proposal {
             return Err(ShihonError::NotEnoughTokensToCreateProposal.into());
@@ -110,15 +104,17 @@ impl OutsideBuyerRecord {
     }
 
     /// Asserts TokenOwner has enough tokens to be allowed to create governance
-    pub fn assert_can_create_governance(
+    pub fn assert_can_sell_own_exceeded_rating_token(
         &self,
-        realm_data: &Realm,
+        bc_token_data: &BcToken,
         voter_weight: u64,
     ) -> Result<(), ProgramError> {
         let min_weight_to_create_governance =
-            if self.governing_token_mint == realm_data.community_mint {
-                realm_data.config.min_community_tokens_to_create_governance
-            } else if Some(self.governing_token_mint) == realm_data.config.council_mint {
+            if self.outside_buyer_token_mint == bc_token_data.community_mint {
+                bc_token_data
+                    .config
+                    .min_community_tokens_to_create_governance
+            } else if Some(self.outside_buyer_token_mint) == bc_token_data.config.council_mint {
                 // For council tokens it's enough to be in possession of any number of tokens
                 1
             } else {
@@ -132,8 +128,8 @@ impl OutsideBuyerRecord {
         Ok(())
     }
 
-    /// Asserts TokenOwner can withdraw tokens from Realm
-    pub fn assert_can_withdraw_governing_tokens(&self) -> Result<(), ProgramError> {
+    /// Asserts TokenOwner can withdraw tokens from bought exceeded token
+    pub fn assert_can_refund_for_exceeded_rating_tokens(&self) -> Result<(), ProgramError> {
         if self.unrelinquished_votes_count > 0 {
             return Err(ShihonError::AllVotesMustBeRelinquishedToWithdrawGoverningTokens.into());
         }
@@ -246,7 +242,7 @@ pub fn get_outside_buyer_token_owner_record_data_for_seeds(
 }
 
 /// Deserializes OutsideBuyerRecord account and asserts it belongs to the given realm
-pub fn get_outside_buyer_token_owner_record_data_for_realm(
+pub fn get_outside_buyer_token_owner_record_data_for_bc_token(
     program_id: &Pubkey,
     outside_buyer_token_owner_record_info: &AccountInfo,
     rater_pubkey: &Pubkey,

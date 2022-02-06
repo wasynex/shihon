@@ -1,6 +1,7 @@
 use solana_program::clock::UnixTimestamp;
 
-use crate::state::bctoken_metadata::{BcTokenConfigArgs, BcTokenConfig};
+use crate::state::bctoken_metadata::{BcTokenConfig, BcTokenConfigArgs};
+use crate::state::enums::BcTokenState;
 use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
@@ -15,15 +16,12 @@ use spl_governance_tools::account::{assert_is_valid_account, get_account_data, A
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct BcToken {
     pub is_initialized: bool,
+    /// Governance account type
+    pub account_type: ShihonAccountType,
     pub issuer_pubkey: Pubkey,
     pub number_of_issue: u64,
     pub link_of_content: String,
     pub issue_at: UnixTimestamp,
-    /// Governance account type
-    pub account_type: ShihonAccountType,
-
-    /// Community mint
-    pub community_mint: Pubkey,
 
     /// Configuration of the Realm
     pub config: BcTokenConfig,
@@ -31,12 +29,14 @@ pub struct BcToken {
     /// Reserved space for future versions
     pub reserved: [u8; 8],
 
-    /// Realm authority. The authority must sign transactions which update the realm config
-    /// The authority should be transferred to Realm Governance to make the Realm self governed through proposals
+    /// bcToken authority
     pub authority: Option<Pubkey>,
 
-    /// Governance Realm name
+    /// bcToken name
     pub name: String,
+
+    /// state
+    pub bc_token_state: BcTokenState,
 
     pub mpc_key: Option<u8>,
 }

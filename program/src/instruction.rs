@@ -254,8 +254,9 @@ pub fn create_bc_token(
         data: instruction.try_to_vec().unwrap(),
     }
 }
-/// for kicking to another bcToken
-pub fn kicking(
+
+/// for kicking KickerCoin to another bcToken
+pub fn kicking_coin(
     program_id: &Pubkey,
     // Accounts
     kicker_token_mint: &Pubkey,
@@ -289,42 +290,83 @@ pub fn kicking(
 }
 
 /// for candidate to (e)RFT after accepted KickerCoin
-pub fn candidate() {
+pub fn candidate(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 /// for Coordinator' choice
-pub fn approve_kicker_coin() {
+pub fn approve_kicker_coin(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
+
 /// for Coordinator's choice
-pub fn revoke_kicker_coin() {
+pub fn deny_kicker_coin(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn mix_content_for_rating() {
+pub fn mix_content_for_rating(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn rate_content() {
+pub fn rate_content(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn bump_self_rate() {
+pub fn bump_self_rate(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn sell_exceeded_rate_token() {
+pub fn sell_exceeded_rate_token(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn buy_exceeded_rate_token() {
+pub fn buy_exceeded_rate_token(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn crowning() {
+pub fn crowning(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
 
-pub fn kicking_to_next_coordinator() {
+pub fn kicking_to_next_coordinator(
+    program_id: &Pubkey,
+    // Accounts
+    // Args
+) -> Instruction {
     unimplemented!();
 }
