@@ -173,12 +173,12 @@ pub fn get_cc_vote_record_data_for_challenger_ring_and_targeted_ring(
 
 /// Returns CCVoteRecord PDA seeds
 pub fn get_cc_vote_record_address_seeds<'a>(
-    proposal: &'a Pubkey,
+    target_ring: &'a Pubkey,
     token_owner_record: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     [
         PROGRAM_AUTHORITY_SEED,
-        proposal.as_ref(),
+        target_ring.as_ref(),
         token_owner_record.as_ref(),
     ]
 }
@@ -186,11 +186,11 @@ pub fn get_cc_vote_record_address_seeds<'a>(
 /// Returns CCVoteRecord PDA address
 pub fn get_cc_vote_record_address<'a>(
     program_id: &Pubkey,
-    proposal: &'a Pubkey,
+    target_ring: &'a Pubkey,
     token_owner_record: &'a Pubkey,
 ) -> Pubkey {
     Pubkey::find_program_address(
-        &get_cc_vote_record_address_seeds(proposal, token_owner_record),
+        &get_cc_vote_record_address_seeds(target_ring, token_owner_record),
         program_id,
     )
     .0

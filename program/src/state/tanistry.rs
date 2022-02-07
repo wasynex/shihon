@@ -188,8 +188,8 @@ pub fn get_token_tanistry_address_seeds<'a>(
     bc_token: &'a Pubkey,
     tanistry_token: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
-    // 'token-governance' prefix ensures uniqueness of the PDA
-    // Note: Only the current token account owner can create an account with this PDA using CreateTokenGovernance instruction
+    // 'token-tanistry' prefix ensures uniqueness of the PDA
+    // Note: Only the current token account owner can create an account with this PDA using CreateTokenTanistry instruction
     [
         b"token-tanistry",
         bc_token.as_ref(),
@@ -216,7 +216,7 @@ pub fn get_account_tanistry_address_seeds<'a>(
     governed_account: &'a Pubkey,
 ) -> [&'a [u8]; 3] {
     [
-        b"account-governance",
+        b"account-tanistry",
         realm.as_ref(),
         governed_account.as_ref(),
     ]

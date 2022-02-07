@@ -9,8 +9,8 @@ pub enum ShihonAccountType {
     /// Default uninitialized account state
     Uninitialized,
 
-    /// Token Owner Record for given governing token owner within a Tanistry
-    TokenOwnerRecord,
+    /// KickerCoin Owner Record for kicker and coordinator before forming a Tanistry
+    KickerCoinOwnerRecord,
 
     /// for candidate limit
     CandidateLimitRecord,
@@ -82,3 +82,8 @@ pub enum VoteSource {
     ///Pull type: Which push or pull
     Snapshot,
 }
+
+/// The content type
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+pub enum ContentType {}

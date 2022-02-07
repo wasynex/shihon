@@ -28,9 +28,8 @@ use crate::{
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 
-
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub enum Mix {
+pub struct Mix {
     /// Mix on the option is not resolved yet
     pub link: Pubkey,
 
@@ -135,7 +134,7 @@ pub fn get_proposal_data_for_governance(
     Ok(proposal_data)
 }
 
-/// Returns Proposal PDA seeds
+/// Returns Rate PDA seeds
 pub fn get_proposal_address_seeds<'a>(
     governance: &'a Pubkey,
     governing_token_mint: &'a Pubkey,

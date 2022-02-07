@@ -7,7 +7,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::state::enums::ShihonAccountType;
+use crate::state::enums::{ContentType, ShihonAccountType};
 
 /// Program metadata account. It stores information about the particular SPL-Governance program instance
 #[repr(C)]

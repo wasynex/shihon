@@ -1,6 +1,7 @@
 use crate::error::ShihonError::InvalidInstruction;
-use crate::state::{get_bc_token_address, get_bc_token_holding_address, BcToken};
-
+use crate::state::{bctoken::{get_bc_token_address, get_bc_token_holding_address, BcToken},
+kicker_coin_owner_record::{get_kicker_coin_owner_record_address},
+}
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
     instruction::{AccountMeta, Instruction},
@@ -255,30 +256,33 @@ pub fn create_bc_token(
     }
 }
 
-/// for kicking KickerCoin to another bcToken
+/// kicking KickerCoin to another bcToken for making (e)RFT instruction
 pub fn kicking_coin(
     program_id: &Pubkey,
     // Accounts
     kicker_token_mint: &Pubkey,
+    kicker_coin_owner_record: &Pubkey,
     bc_token_authority: &Pubkey,
     payer: &Pubkey,
     // Args
     coordinator: &Pubkey,
     amount: u64,
 ) -> Instruction {
-    let kicker_token_address = get_kicker_token_address(program_id);
-    let kicker_token_holding_address =
-        get_kicker_token_holding_address(program_id, &kicker_token_address, kicker_token_mint);
-    let mut accounts = vec![
+    let kicker_coin_owner_record_address =
+        get_kicker_coin_owner_record_address(program_id, kicker_token_mint, coordinator);
+
+    let accounts = vec![
+        AccountMeta::new(*kicker_token_mint, false),
+        AccountMeta::new_readonly(*kicker_coin_owner_record, false),
+        AccountMeta::new_readonly(*bc_token_authority, true),
+        AccountMeta::new(kicker_coin_owner_record_address, false),
         AccountMeta::new(*payer, true),
-        AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
-        AccountMeta::new_readonly(spl_token::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
     let instruction = ShihonInstruction::Kicking {
-        coordinator,
+        coordinator: *coordinator,
         amount,
     };
 
@@ -289,80 +293,349 @@ pub fn kicking_coin(
     }
 }
 
-/// for candidate to (e)RFT after accepted KickerCoin
-pub fn candidate(
-    program_id: &Pubkey,
-    // Accounts
-    // Args
-) -> Instruction {
-    unimplemented!();
-}
-/// for Coordinator' choice
+
+/// Instruction whether the coordinator approve the KickerCoin
+#[allow(clippy::too_many_arguments)]
 pub fn approve_kicker_coin(
     program_id: &Pubkey,
     // Accounts
+    governance: &Pubkey,
+    proposal_owner_record: &Pubkey,
+    governance_authority: &Pubkey,
+    payer: &Pubkey,
+    voter_weight_record: Option<Pubkey>,
     // Args
+    realm: &Pubkey,
+    name: String,
+    description_link: String,
+    governing_token_mint: &Pubkey,
+    vote_type: VoteType,
+    options: Vec<String>,
+    use_deny_option: bool,
+    proposal_index: u32,
 ) -> Instruction {
-    unimplemented!();
+    let proposal_address = get_proposal_address(
+        program_id,
+        governance,
+        governing_token_mint,
+        &proposal_index.to_le_bytes(),
+    );
+
+    let mut accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new(proposal_address, false),
+        AccountMeta::new(*governance, false),
+        AccountMeta::new(*proposal_owner_record, false),
+        AccountMeta::new_readonly(*governing_token_mint, false),
+        AccountMeta::new_readonly(*governance_authority, true),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
+    ];
+
+    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
+
+    let instruction = GovernanceInstruction::Approve {
+        name,
+        description_link,
+        vote_type,
+        options,
+        use_deny_option,
+    };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
-/// for Coordinator's choice
+/// Instruction whether the coordinator approve the KickerCoin
 pub fn deny_kicker_coin(
     program_id: &Pubkey,
     // Accounts
-    // Args
+    kicker_token_mint: &Pubkey,
+    kicker_coin_owner_record: &Pubkey,
+    bc_token_authority: &Pubkey,
+    payer: &Pubkey,
 ) -> Instruction {
-    unimplemented!();
+    let kicker_coin_owner_record_address =
+        get_kicker_coin_owner_record_address(program_id, kicker_token_mint, coordinator);
+
+    let accounts = vec![
+        AccountMeta::new(*proposal, false),
+        AccountMeta::new_readonly(*token_owner_record, false),
+        AccountMeta::new_readonly(*governance_authority, true),
+        AccountMeta::new(signatory_record_address, false),
+        AccountMeta::new(*beneficiary, false),
+    ];
+
+    let instruction = GovernanceInstruction::Deny {
+        signatory: *signatory,
+    };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
-pub fn mix_content_for_rating(
+/// Candidate instruction after accepted KickerCoin
+#[allow(clippy::too_many_arguments)]
+pub fn candidate(
     program_id: &Pubkey,
     // Accounts
+    realm: &Pubkey,
+    governing_token_source: &Pubkey,
+    governing_token_owner: &Pubkey,
+    governing_token_transfer_authority: &Pubkey,
+    payer: &Pubkey,
     // Args
+    amount: u64,
+    governing_token_mint: &Pubkey,
 ) -> Instruction {
-    unimplemented!();
+    let token_owner_record_address = get_token_owner_record_address(
+        program_id,
+        realm,
+        governing_token_mint,
+        governing_token_owner,
+    );
+
+    let governing_token_holding_address =
+        get_governing_token_holding_address(program_id, realm, governing_token_mint);
+
+    let accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new(governing_token_holding_address, false),
+        AccountMeta::new(*governing_token_source, false),
+        AccountMeta::new_readonly(*governing_token_owner, true),
+        AccountMeta::new_readonly(*governing_token_transfer_authority, true),
+        AccountMeta::new(token_owner_record_address, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+    ];
+
+    let instruction = GovernanceInstruction::DepositGoverningTokens { amount };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+/// Rating other mixed content instruction
 pub fn rate_content(
     program_id: &Pubkey,
     // Accounts
-    // Args
+    realm: &Pubkey,
+    governing_token_owner: &Pubkey,
+    governing_token_mint: &Pubkey,
+    payer: &Pubkey,
 ) -> Instruction {
-    unimplemented!();
+    let token_owner_record_address = get_token_owner_record_address(
+        program_id,
+        realm,
+        governing_token_mint,
+        governing_token_owner,
+    );
+
+    let accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new_readonly(*governing_token_owner, false),
+        AccountMeta::new(token_owner_record_address, false),
+        AccountMeta::new_readonly(*governing_token_mint, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+    ];
+
+    let instruction = GovernanceInstruction::CreateTokenOwnerRecord {};
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+/// Bump self rating instruction
+#[allow(clippy::too_many_arguments)]
 pub fn bump_self_rate(
     program_id: &Pubkey,
     // Accounts
+    realm: &Pubkey,
+    governing_token_source: &Pubkey,
+    governing_token_owner: &Pubkey,
+    governing_token_transfer_authority: &Pubkey,
+    payer: &Pubkey,
     // Args
+    amount: u64,
+    governing_token_mint: &Pubkey,
 ) -> Instruction {
-    unimplemented!();
+    let token_owner_record_address = get_token_owner_record_address(
+        program_id,
+        realm,
+        governing_token_mint,
+        governing_token_owner,
+    );
+
+    let governing_token_holding_address =
+        get_governing_token_holding_address(program_id, realm, governing_token_mint);
+
+    let accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new(governing_token_holding_address, false),
+        AccountMeta::new(*governing_token_source, false),
+        AccountMeta::new_readonly(*governing_token_owner, true),
+        AccountMeta::new_readonly(*governing_token_transfer_authority, true),
+        AccountMeta::new(token_owner_record_address, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+    ];
+
+    let instruction = GovernanceInstruction::DepositGoverningTokens { amount };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+
+/// sell instruction
+#[allow(clippy::too_many_arguments)]
 pub fn sell_exceeded_rate_token(
     program_id: &Pubkey,
     // Accounts
+    realm: &Pubkey,
+    governed_mint: &Pubkey,
+    governed_mint_authority: &Pubkey,
+    token_owner_record: &Pubkey,
+    payer: &Pubkey,
+    governance_authority: &Pubkey,
+    voter_weight_record: Option<Pubkey>,
     // Args
+    config: GovernanceConfig,
+    transfer_mint_authorities: bool,
 ) -> Instruction {
-    unimplemented!();
+    let mint_governance_address = get_mint_governance_address(program_id, realm, governed_mint);
+
+    let mut accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new(mint_governance_address, false),
+        AccountMeta::new(*governed_mint, false),
+        AccountMeta::new_readonly(*governed_mint_authority, true),
+        AccountMeta::new_readonly(*token_owner_record, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(*governance_authority, true),
+    ];
+
+    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
+
+    let instruction = GovernanceInstruction::CreateMintGovernance {
+        config,
+        transfer_mint_authorities,
+    };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+
+#[allow(clippy::too_many_arguments)]
+/// buy instruction
 pub fn buy_exceeded_rate_token(
     program_id: &Pubkey,
     // Accounts
+    realm: &Pubkey,
+    governed_token: &Pubkey,
+    governed_token_owner: &Pubkey,
+    token_owner_record: &Pubkey,
+    payer: &Pubkey,
+    governance_authority: &Pubkey,
+    voter_weight_record: Option<Pubkey>,
     // Args
+    config: GovernanceConfig,
+    transfer_account_authorities: bool,
 ) -> Instruction {
-    unimplemented!();
+    let token_governance_address = get_token_governance_address(program_id, realm, governed_token);
+
+    let mut accounts = vec![
+        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new(token_governance_address, false),
+        AccountMeta::new(*governed_token, false),
+        AccountMeta::new_readonly(*governed_token_owner, true),
+        AccountMeta::new_readonly(*token_owner_record, false),
+        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(*governance_authority, true),
+    ];
+
+    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
+
+    let instruction = GovernanceInstruction::CreateTokenGovernance {
+        config,
+        transfer_account_authorities,
+    };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+
+/// Choose the crown on Roydamna instruction
 pub fn crowning(
     program_id: &Pubkey,
     // Accounts
+    governance_authority: &Pubkey,
     // Args
+    realm: &Pubkey,
+    governing_token_mint: &Pubkey,
+    governing_token_owner: &Pubkey,
+    new_governance_delegate: &Option<Pubkey>,
 ) -> Instruction {
-    unimplemented!();
+    let vote_record_address = get_token_owner_record_address(
+        program_id,
+        realm,
+        governing_token_mint,
+        governing_token_owner,
+    );
+
+    let accounts = vec![
+        AccountMeta::new_readonly(*governance_authority, true),
+        AccountMeta::new(vote_record_address, false),
+    ];
+
+    let instruction = GovernanceInstruction::SetGovernanceDelegate {
+        new_governance_delegate: *new_governance_delegate,
+    };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
 }
 
+/// probably this function would join to kicking_coin function
 pub fn kicking_to_next_coordinator(
     program_id: &Pubkey,
     // Accounts

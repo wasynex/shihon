@@ -144,7 +144,6 @@ impl OutsideBuyerRecord {
     /// Decreases outstanding_proposal_count
     pub fn decrease_outstanding_proposal_count(&mut self) {
         // Previous versions didn't use the count and it can be already 0
-        // TODO: Remove this check once all outstanding proposals on mainnet are resolved
         if self.outstanding_proposal_count != 0 {
             self.outstanding_proposal_count =
                 self.outstanding_proposal_count.checked_sub(1).unwrap();
@@ -241,7 +240,7 @@ pub fn get_outside_buyer_token_owner_record_data_for_seeds(
     get_outside_buyer_token_owner_record_data(program_id, outside_buyer_token_owner_record_info)
 }
 
-/// Deserializes OutsideBuyerRecord account and asserts it belongs to the given realm
+/// Deserializes OutsideBuyerRecord account and asserts it belongs to
 pub fn get_outside_buyer_token_owner_record_data_for_bc_token(
     program_id: &Pubkey,
     outside_buyer_token_owner_record_info: &AccountInfo,
@@ -259,7 +258,7 @@ pub fn get_outside_buyer_token_owner_record_data_for_bc_token(
     Ok(outside_buyer_token_owner_record_data)
 }
 
-/// Deserializes OutsideBuyerRecord account and  asserts it belongs to the given realm and is for the given governing mint
+/// Deserializes OutsideBuyerRecord account and  asserts it belongs to and is for the given outside buyer mint
 pub fn get_outside_buyer_token_owner_record_data_for_rater_and_outside_buyer_mint(
     program_id: &Pubkey,
     outside_buyer_token_owner_record_info: &AccountInfo,
@@ -280,7 +279,7 @@ pub fn get_outside_buyer_token_owner_record_data_for_rater_and_outside_buyer_min
     Ok(outside_buyer_token_owner_record_data)
 }
 
-///  Deserializes OutsideBuyerRecord account and checks its address is the give proposal_owner
+///  Deserializes OutsideBuyerRecord account and checks its address is the give token owner
 pub fn get_outside_buyer_token_owner_record_data_for_content_owner(
     program_id: &Pubkey,
     outside_buyer_token_owner_record_info: &AccountInfo,
