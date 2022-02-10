@@ -8,4 +8,4 @@ pub mod state;
 pub use solana_program;
 
 /// Seed prefix for bcToken  PDAs
-pub const PROGRAM_AUTHORITY_SEED: &[u8] = b"bctoken";
+pub const PROGRAM_AUTHORITY_SEED: &[u8] = b"bc_token";

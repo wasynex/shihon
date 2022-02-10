@@ -21,14 +21,20 @@ pub struct RateOtherRecord {
     /// Rate account type
     pub account_type: ShihonAccountType,
 
-    /// Rater's Pubkey
-    pub rater_pubkey: Pubkey,
+    /// Mix content record
+    pub mix_content_record: Pubkey,
 
-    /// Rated content
-    pub rated_content: Pubkey,
+    // CC vote record
+    pub cc_vote_record: Pubkey,
 
-    ///
+    /// Outside Buyer Record
+    pub outside_buyer_record: Pubkey,
+
+    /// Rate count
     pub rate_amount: u64,
+
+    /// Rating time
+    pub rating_time: Option<UnixTimestamp>,
 }
 
 impl AccountMaxSize for RateOtherRecord {}

@@ -2,10 +2,7 @@
 
 use crate::{
     error::ShihonError,
-    state::{
-        enums::{ShihonAccountType, VoteThresholdPercentage, VoteWeightSource},
-        realm::assert_is_valid_realm,
-    },
+    state::enums::{ShihonAccountType, VoteThresholdPercentage, VoteWeightSource},
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
@@ -16,36 +13,6 @@ use spl_governance_tools::{
     account::{assert_is_valid_account2, get_account_data, AccountMaxSize},
     error::GovernanceToolsError,
 };
-
-/// Tanistry config
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub struct TanistryConfig {
-    /// The type of the vote threshold used for voting
-    /// Note: In the current version only YesVote threshold is supported
-    pub vote_threshold_percentage: VoteThresholdPercentage,
-
-    /// Minimum number of community tokens a governance token owner must possess to be able to create a proposal
-    pub min_community_tokens_to_create_proposal: u64,
-
-    /// Minimum waiting time in seconds for an instruction to be executed after proposal is voted on
-    pub min_instruction_hold_up_time: u32,
-
-    /// Time limit in seconds for proposal to be open for voting
-    pub max_voting_time: u32,
-
-    /// The source of vote weight for voters
-    /// Note: In the current version only token deposits are accepted as vote weight
-    pub vote_weight_source: VoteWeightSource,
-
-    /// The time period in seconds within which a Proposal can be still cancelled after being voted on
-    /// Once cool off time expires Proposal can't be cancelled any longer and becomes a law
-    /// Note: This field is not implemented in the current version
-    pub proposal_cool_off_time: u32,
-
-    /// Minimum number of council tokens a governance token owner must possess to be able to create a proposal
-    pub min_council_tokens_to_create_proposal: u64,
-}
 
 /// Tanistry Account
 #[repr(C)]
@@ -59,11 +26,17 @@ pub struct Tanistry {
 
     pub account_type: ShihonAccountType,
 
-    /// Governance config
-    pub config: TanistryConfig,
-
     /// Reserved space for future versions
     pub reserved: [u8; 8],
+
+    /// kicker coin owner record
+    pub kicker_coin_owner_record: Pubkey,
+
+    /// CandidateLimitRecord List
+    pub candidate_limit_record_list: Vec<Pubkey>,
+
+    /// total amount of coin
+    pub total_amount_of_coin: Lamports,
 }
 
 impl AccountMaxSize for Tanistry {}
@@ -123,8 +96,8 @@ pub fn get_tanistry_data_for_bc_token(
     Ok(tanistry_data)
 }
 
-/// Checks the given account is a governance account and belongs to the given realm
-pub fn assert_governance_for_realm(
+/// Checks the given account is a bcToken account and belongs to the given tanistry
+pub fn assert_tanistry_for_bc_token(
     program_id: &Pubkey,
     tanistry_info: &AccountInfo,
     bc_token: &Pubkey,
@@ -261,32 +234,6 @@ pub fn assert_valid_create_tanistry_args(
     assert_is_valid_bc_token(program_id, bc_token_info)?;
 
     assert_is_valid_tanistry_config(tanistry_config)?;
-
-    Ok(())
-}
-
-/// Validates tanistry config parameters
-pub fn assert_is_valid_tanistry_config(
-    tanistry_config: &TanistryConfig,
-) -> Result<(), ProgramError> {
-    match tanistry_config.vote_threshold_percentage {
-        VoteThresholdPercentage::YesVote(yes_vote_threshold_percentage) => {
-            if !(1..=100).contains(&yes_vote_threshold_percentage) {
-                return Err(ShihonError::InvalidVoteThresholdPercentage.into());
-            }
-        }
-        _ => {
-            return Err(ShihonError::VoteThresholdPercentageTypeNotSupported.into());
-        }
-    }
-
-    if tanistry_config.vote_weight_source != VoteWeightSource::Deposit {
-        return Err(ShihonError::VoteWeightSourceNotSupported.into());
-    }
-
-    if tanistry_config.proposal_cool_off_time > 0 {
-        return Err(ShihonError::ProposalCoolOffTimeNotSupported.into());
-    }
 
     Ok(())
 }

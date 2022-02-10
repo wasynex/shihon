@@ -293,7 +293,7 @@ pub fn kicking_coin(
     }
 }
 
-
+///TODO: need to fix from here to end
 /// Instruction whether the coordinator approve the KickerCoin
 #[allow(clippy::too_many_arguments)]
 pub fn approve_kicker_coin(
@@ -336,7 +336,7 @@ pub fn approve_kicker_coin(
 
     with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
 
-    let instruction = GovernanceInstruction::Approve {
+    let instruction = ShihonInstruction::Approve {
         name,
         description_link,
         vote_type,
@@ -371,7 +371,7 @@ pub fn deny_kicker_coin(
         AccountMeta::new(*beneficiary, false),
     ];
 
-    let instruction = GovernanceInstruction::Deny {
+    let instruction = ShihonInstruction::Deny {
         signatory: *signatory,
     };
 
@@ -419,7 +419,7 @@ pub fn candidate(
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = GovernanceInstruction::DepositGoverningTokens { amount };
+    let instruction = ShihonInstruction::DepositGoverningTokens { amount };
 
     Instruction {
         program_id: *program_id,
@@ -453,7 +453,7 @@ pub fn rate_content(
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 
-    let instruction = GovernanceInstruction::CreateTokenOwnerRecord {};
+    let instruction = ShihonInstruction::CreateTokenOwnerRecord {};
 
     Instruction {
         program_id: *program_id,
@@ -499,7 +499,7 @@ pub fn bump_self_rate(
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = GovernanceInstruction::DepositGoverningTokens { amount };
+    let instruction = ShihonInstruction::DepositGoverningTokens { amount };
 
     Instruction {
         program_id: *program_id,
@@ -542,7 +542,7 @@ pub fn sell_exceeded_rate_token(
 
     with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
 
-    let instruction = GovernanceInstruction::CreateMintGovernance {
+    let instruction = ShihonInstruction::CreateMintGovernance {
         config,
         transfer_mint_authorities,
     };
@@ -588,7 +588,7 @@ pub fn buy_exceeded_rate_token(
 
     with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
 
-    let instruction = GovernanceInstruction::CreateTokenGovernance {
+    let instruction = ShihonInstruction::CreateTokenGovernance {
         config,
         transfer_account_authorities,
     };
@@ -624,7 +624,7 @@ pub fn crowning(
         AccountMeta::new(vote_record_address, false),
     ];
 
-    let instruction = GovernanceInstruction::SetGovernanceDelegate {
+    let instruction = ShihonInstruction::SetGovernanceDelegate {
         new_governance_delegate: *new_governance_delegate,
     };
 

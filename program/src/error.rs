@@ -270,9 +270,9 @@ pub enum ShihonError {
     #[error("Invalid Realm for Governance")]
     InvalidRealmForGovernance,
 
-    /// Invalid Authority for Realm
-    #[error("Invalid Authority for Realm")]
-    InvalidAuthorityForRealm,
+    /// Invalid Authority for bcToken
+    #[error("Invalid Authority for bcToken")]
+    InvalidAuthorityForBcToken,
 
     /// Realm has no authority
     #[error("Realm has no authority")]

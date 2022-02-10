@@ -64,8 +64,8 @@ pub struct BcTokenConfig {
     /// The source used for community mint max vote weight source
     pub community_mint_max_vote_weight_source: MintMaxVoteWeightSource,
 
-    /// Optional council mint
-    pub council_mint: Option<Pubkey>,
+    /// for candidate
+    pub bc_token_mint: Pubkey,
 }
 
 impl AccountMaxSize for BcTokenMetadata {

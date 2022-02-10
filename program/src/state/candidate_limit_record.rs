@@ -47,8 +47,8 @@ pub struct CandidateLimitRecord {
     /// This is to use it as self-rating
     pub candidate_token_deposit_amount: u64,
 
-    /// The list of Candidate
-    pub list_of_candidate: Vec<Pubkey>,
+    /// candidate(bcToken)
+    pub candidate: Pubkey,
 }
 
 impl AccountMaxSize for CandidateLimitRecord {
@@ -63,6 +63,7 @@ impl IsInitialized for CandidateLimitRecord {
     }
 }
 ///TODO: not yet fix this associated functions
+/// we need to write the Limit code here
 impl CandidateLimitRecord {
     /// Checks whether the provided Governance Authority signed transaction
     pub fn assert_token_owner_or_delegate_is_signer(

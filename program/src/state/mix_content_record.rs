@@ -33,14 +33,17 @@ pub struct MixContentRecord {
     /// Mix on the option is not resolved yet
     pub link: Pubkey,
 
-    /// Mix on the option is completed and the option passed
-    pub buddy_candidate: Pubkey,
-
-    /// Mix on the option is completed and the option was defeated
+    /// rater candidate (It's you!)
     pub rater_candidate: Pubkey,
+
+    /// Buddy candidate
+    pub buddy_candidate: Pubkey,
 
     /// Mix content result state before rating action
     pub option_mix_result: OptionMixResult,
+
+    /// FInger print of Mixed Content
+    pub finger_print_of_mixed_content: String,
 }
 
 /// Mix content result state before rating action

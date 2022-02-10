@@ -16,7 +16,6 @@ use crate::PROGRAM_AUTHORITY_SEED;
 
 use crate::state::{
     enums::ShihonAccountType,
-    legacy::{VoteRecordV1, VoteWeightV1},
 };
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]

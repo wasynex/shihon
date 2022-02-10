@@ -15,10 +15,10 @@ use crate::state::enums::ShihonAccountType;
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct KickerCoinOwnerRecord {
-    /// Governance account type
+    /// account type
     pub account_type: ShihonAccountType,
 
-    /// KickerCoin holder
+    /// KickerCoin holder(first kicker or all crown)
     pub kicker_coin_holder: Pubkey,
 
     /// The account of the Coordinator
