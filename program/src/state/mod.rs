@@ -5,5 +5,6 @@ pub mod cc_vote_record;
 pub mod enums;
 pub mod mix_content_record;
 pub mod outside_buyer_record;
+pub mod rate_option;
 pub mod rate_other_record;
 pub mod tanistry;

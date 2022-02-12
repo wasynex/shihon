@@ -18,12 +18,22 @@ use spl_governance_tools::{
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct Tanistry {
+    ///
     pub is_initialized: bool,
+
+    ///
     pub kicker_pubkey: Pubkey,
+
+    ///
     pub next_tanistry_id: Option<Pubkey>,
+
+    ///
     pub previous_tanistry_id: Option<Pubkey>,
+
+    ///
     pub building_key: Vec<u8>,
 
+    ///
     pub account_type: ShihonAccountType,
 
     /// Reserved space for future versions
@@ -36,7 +46,7 @@ pub struct Tanistry {
     pub candidate_limit_record_list: Vec<Pubkey>,
 
     /// total amount of coin
-    pub total_amount_of_coin: Lamports,
+    pub total_amount_of_coin: u64,
 }
 
 impl AccountMaxSize for Tanistry {}

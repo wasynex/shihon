@@ -21,11 +21,11 @@ pub struct KickerCoinOwnerRecord {
     /// KickerCoin holder(first kicker or all crown)
     pub kicker_coin_holder: Pubkey,
 
-    /// The account of the Coordinator
+    /// The account of the Coordinator, which means the person who receive KickerCoin
     pub coordinator: Pubkey,
 
     /// Indicates whether the coordinator approve the KickerCoin
-    pub kick_off: bool,
+    pub is_kick_off: bool,
 }
 
 impl AccountMaxSize for KickerCoinOwnerRecord {}

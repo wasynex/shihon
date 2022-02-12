@@ -9,11 +9,26 @@ pub enum ShihonAccountType {
     /// Default uninitialized account state
     Uninitialized,
 
+    /// bcToken
+    BcToken,
+
+    /// bcToken's inside metadata
+    BcTokenMetadata,
+
     /// KickerCoin Owner Record for kicker and coordinator before forming a Tanistry
     KickerCoinOwnerRecord,
 
+    /// Tanistry
+    Tanistry,
+
     /// for candidate limit
     CandidateLimitRecord,
+
+    /// Mix Content Record
+    MixContentRecord,
+
+    /// Rate Option for holding some accounts
+    RateOption,
 
     /// for rating other's content
     RateOtherRecord,
@@ -23,9 +38,6 @@ pub enum ShihonAccountType {
 
     /// for cc voting
     CCVoteRecord,
-
-    /// bcToken's inside metadata
-    BcTokenMetadata,
 }
 
 impl Default for ShihonAccountType {
@@ -45,7 +57,7 @@ pub enum BcTokenState {
     ExecutingWithErrors,
 
     /// just for holding own content in his wallet when its content has reached to Oracle
-    PrivateForHolding,
+    HoldingOnPrivate,
 
     /// for casting own content on public for waiting a KickerCoin by kicker
     PublicOnTheGround,
@@ -53,7 +65,7 @@ pub enum BcTokenState {
     /// enable to candidate on Tanistry because coordinator has approved KickerCoin
     EnableToCandidate,
 
-    /// Deadline for candidates
+    /// Deadline has come for candidates
     TanistrySetIn,
 
     /// enable to vote for CC because minimum number of round has done
@@ -61,6 +73,9 @@ pub enum BcTokenState {
 
     /// Enable to refund because everything has finished
     EnableToRefund,
+
+    /// already been refunded by someone
+    AlreadyRefunded,
 
     /// when holder has cancelled to turn it to private
     Cancelled,
@@ -82,8 +97,3 @@ pub enum VoteSource {
     ///Pull type: Which push or pull
     Snapshot,
 }
-
-/// The content type
-#[repr(C)]
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub enum ContentType {}

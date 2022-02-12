@@ -7,9 +7,9 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::{error::GovernanceError, PROGRAM_AUTHORITY_SEED};
+use crate::{error::ShihonError, PROGRAM_AUTHORITY_SEED};
 
-use crate::state::enums::GovernanceAccountType;
+use crate::state::enums::ShihonAccountType;
 
 /// Account PDA seeds: ['governance', proposal, signatory]
 #[repr(C)]
@@ -26,13 +26,18 @@ pub struct RateOption {
 
     /// number of issue
     pub number_of_issue: u8,
+
+    /// Key Holder
+    pub buddy_candidate: Pubkey,
+
+    pub init_content: Pubkey,
 }
 
 impl AccountMaxSize for RateOption {}
 
 impl IsInitialized for RateOption {
     fn is_initialized(&self) -> bool {
-        self.account_type == GovernanceAccountType::SignatoryRecord
+        self.account_type == ShihonAccountType::RateOption
     }
 }
 
@@ -40,11 +45,11 @@ impl RateOption {
     /// Checks signatory hasn't signed off yet and is transaction signer
     pub fn assert_can_sign_off(&self, signatory_info: &AccountInfo) -> Result<(), ProgramError> {
         if self.signed_off {
-            return Err(GovernanceError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
         if !signatory_info.is_signer {
-            return Err(GovernanceError::SignatoryMustSign.into());
+            return Err(ShihonError::SignatoryMustSign.into());
         }
 
         Ok(())
@@ -53,14 +58,14 @@ impl RateOption {
     /// Checks signatory can be removed from Proposal
     pub fn assert_can_remove_signatory(&self) -> Result<(), ProgramError> {
         if self.signed_off {
-            return Err(GovernanceError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::SignatoryAlreadySignedOff.into());
         }
 
         Ok(())
     }
 }
 
-/// Returns SignatoryRecord PDA seeds
+/// Returns Rate Option PDA seeds
 pub fn get_signatory_record_address_seeds<'a>(
     proposal: &'a Pubkey,
     signatory: &'a Pubkey,
@@ -72,7 +77,7 @@ pub fn get_signatory_record_address_seeds<'a>(
     ]
 }
 
-/// Returns SignatoryRecord PDA address
+/// Returns Rate Option PDA address
 pub fn get_signatory_record_address<'a>(
     program_id: &Pubkey,
     proposal: &'a Pubkey,
@@ -85,28 +90,28 @@ pub fn get_signatory_record_address<'a>(
     .0
 }
 
-/// Deserializes SignatoryRecord account and checks owner program
+/// Deserializes Rate Option account and checks owner program
 pub fn get_signatory_record_data(
     program_id: &Pubkey,
     signatory_record_info: &AccountInfo,
-) -> Result<SignatoryRecord, ProgramError> {
-    get_account_data::<SignatoryRecord>(program_id, signatory_record_info)
+) -> Result<RateOption, ProgramError> {
+    get_account_data::<RateOption>(program_id, signatory_record_info)
 }
 
-/// Deserializes SignatoryRecord  and validates its PDA
+/// Deserializes Rate Option  and validates its PDA
 pub fn get_signatory_record_data_for_seeds(
     program_id: &Pubkey,
     signatory_record_info: &AccountInfo,
     proposal: &Pubkey,
     signatory: &Pubkey,
-) -> Result<SignatoryRecord, ProgramError> {
+) -> Result<RateOption, ProgramError> {
     let (signatory_record_address, _) = Pubkey::find_program_address(
         &get_signatory_record_address_seeds(proposal, signatory),
         program_id,
     );
 
     if signatory_record_address != *signatory_record_info.key {
-        return Err(GovernanceError::InvalidSignatoryAddress.into());
+        return Err(ShihonError::InvalidSignatoryAddress.into());
     }
 
     get_signatory_record_data(program_id, signatory_record_info)

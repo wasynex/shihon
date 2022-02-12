@@ -7,7 +7,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::state::enums::{ContentType, ShihonAccountType};
+use crate::state::enums::ShihonAccountType;
 
 /// Program metadata account. It stores information about the particular SPL-Governance program instance
 #[repr(C)]
@@ -27,8 +27,20 @@ pub struct BcTokenMetadata {
 
     /// what content type
     pub content_type: ContentType,
+
+    /// True if the `pubkey` can be loaded as a read-write account.
+    pub is_writable: bool,
+
+    /// True if an bcToken requires a Transaction signature matching `pubkey`.
+    pub is_signer: bool,
 }
 
+/// The content type
+#[repr(C)]
+#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+pub enum ContentType {}
+
+/// TODO: do not need this
 /// bcToken Config instruction args
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
@@ -54,9 +66,6 @@ pub struct BcTokenConfigArgs {
 pub struct BcTokenConfig {
     /// Indicates whether an external addin program should be used to provide voters weights for the community mint
     pub use_community_voter_weight_addin: bool,
-
-    /// Reserved space for future versions
-    pub reserved: [u8; 7],
 
     /// Min number of community tokens required to create a governance
     pub min_community_tokens_to_create_governance: u64,

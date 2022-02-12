@@ -30,6 +30,9 @@ use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct MixContentRecord {
+    ///
+    pub is_initialized: bool,
+    
     /// Mix on the option is not resolved yet
     pub link: Pubkey,
 
@@ -42,7 +45,7 @@ pub struct MixContentRecord {
     /// Mix content result state before rating action
     pub option_mix_result: OptionMixResult,
 
-    /// FInger print of Mixed Content
+    /// Finger print of Mixed Content
     pub finger_print_of_mixed_content: String,
 }
 
