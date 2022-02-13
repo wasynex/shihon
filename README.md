@@ -35,11 +35,11 @@ For more Solana specifications, read
 
 ## Author's Telephone Number
 
-Simon Wayne
+Simon W. Parker
 
 Mail Address: wasyne@xmail.net
 
-DF 47 F2 9F 23 9E 4F DB 15 85 8C 50 03 9D FE 5B 04 27 4B F8
+C076E9D1F122DFD3D6FD5E1077D68E41584840C8
 
 Telegram: [@wasyne](https://t.me/wasyne)
 
@@ -53,7 +53,7 @@ _Please keep in mind this project is in under construction now, and keen to reac
 
 ## License
 
-Copyright © 2022 Simon Wayne
+Copyright © 2022 Simon W. Parker
 
 This project is Apache 2.0 licensed.
 
