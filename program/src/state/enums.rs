@@ -46,7 +46,7 @@ impl Default for ShihonAccountType {
     }
 }
 
-/// What state a Proposal is in
+/// What state a bcToken is in
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum BcTokenState {

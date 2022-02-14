@@ -18,12 +18,13 @@ pub struct KickerCoinOwnerRecord {
     /// account type
     pub account_type: ShihonAccountType,
 
-    /// KickerCoin holder(first kicker or all crown)
+    /// KickerCoin holder(first kicker or all Crown)
     pub kicker_coin_holder: Pubkey,
 
     /// The account of the Coordinator, which means the person who receive KickerCoin
     pub coordinator: Pubkey,
 
+    /// It means that this record will always be created regardless of whether it is approved by coordinator.
     /// Indicates whether the coordinator approve the KickerCoin
     pub is_kick_off: bool,
 }
@@ -37,14 +38,14 @@ impl IsInitialized for KickerCoinOwnerRecord {
 }
 
 impl KickerCoinOwnerRecord {
-    /// Checks signatory hasn't signed off yet and is transaction signer
+    /// Checks KickerCoin hasn't kicked off yet and is transaction by KickerCoin holder
     pub fn assert_can_kick_off(&self, kicker_coin_info: &AccountInfo) -> Result<(), ProgramError> {
         if self.kick_off {
-            return Err(ShihonError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::KickerCoinAlreadyKickedOff.into());
         }
 
-        if !kicker_coin_info.is_signer {
-            return Err(ShihonError::SignatoryMustSign.into());
+        if !kicker_coin_info.kicker_coin_holder {
+            return Err(ShihonError::KickerCoinHolderMustSign.into());
         }
 
         Ok(())
@@ -53,10 +54,20 @@ impl KickerCoinOwnerRecord {
     /// Checks KickerCoin owner record can be removed from KickerCoinOwnerRecord
     pub fn assert_can_remove_kicker_coin_owner(&self) -> Result<(), ProgramError> {
         if self.kick_off {
-            return Err(ShihonError::SignatoryAlreadySignedOff.into());
+            return Err(ShihonError::KickerCoinAlreadyKickedOff.into());
         }
 
         Ok(())
+    }
+
+    /// Who cannot be selected as a coordinator?
+    //  1. Does not have a bcToken.
+    //  2. The same person as the kicker (i.e., self-made).
+    //  3. The rules for blooded (read the whitepaper)
+
+    /// Checks Coordinator is suitable for receive the KickerCoin
+    pub fn assert_can_kick_to_suitable_coordinator(&self) -> Result<(), ProgramError> {
+        unimplemented!();
     }
 }
 

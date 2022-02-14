@@ -1,8 +1,12 @@
 //! Signatory Record
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+
 use solana_program::{
-    account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,
+    account_info::AccountInfo,
+    clock::{Slot, UnixTimestamp},
+    program_error::ProgramError,
+    program_pack::IsInitialized,
     pubkey::Pubkey,
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
@@ -66,6 +70,15 @@ impl RateOtherRecord {
         }
 
         Ok(())
+    }
+    ///
+    /// for rating the content
+    fn multi_sig_2() -> Pubkey {
+        unimplemented!();
+    }
+    /// for rating the content
+    fn multi_sig_3() -> Pubkey {
+        unimplemented!();
     }
 }
 

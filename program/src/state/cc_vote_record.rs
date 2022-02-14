@@ -3,28 +3,31 @@
 use borsh::maybestd::io::Write;
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::account_info::AccountInfo;
-use solana_program::borsh::try_from_slice_unchecked;
 
-use solana_program::program_error::ProgramError;
-use solana_program::{program_pack::IsInitialized, pubkey::Pubkey};
+use solana_program::{
+    account_info::AccountInfo,
+    borsh::try_from_slice_unchecked,
+    clock::{Slot, UnixTimestamp},
+    instruction::{AccountMeta, Instruction},
+    program_error::ProgramError,
+    program_pack::IsInitialized,
+    pubkey::Pubkey,
+};
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
 use crate::error::ShihonError;
 
 use crate::PROGRAM_AUTHORITY_SEED;
 
-use crate::state::{
-    enums::ShihonAccountType,
-};
+use crate::state::enums::ShihonAccountType;
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct CCVoteChoice {
+    /// Challenger Ring
+    pub challenger_ring: Option<Pubkey>,
+
     /// which ring need to make CC
     pub target_ring: Option<Pubkey>,
-
-    ///
-    pub challenger_ring: Option<Pubkey>,
 }
 
 // impl CCVoteChoice {
@@ -44,22 +47,22 @@ pub enum Vote {
     /// want to pull the other ring to make CC
     Pull(Vec<CCVoteChoice>),
 
-    /// want to push
+    /// want to push(it means ignored)
     Push,
 }
 
 /// Proposal VoteRecord
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct CCVoteRecord {
-    /// Governance account type
+    /// account type
     pub account_type: ShihonAccountType,
-
-    /// Proposal account
-    pub proposal: Pubkey,
 
     /// The user who casted this vote
     /// This is the Governing Token Owner who deposited governing tokens into the Realm
     pub governing_token_owner: Pubkey,
+
+    /// when system counted the whole voting
+    pub counting_time: Slot,
 
     /// Indicates whether the vote was relinquished by voter
     pub is_relinquished: bool,
@@ -88,6 +91,7 @@ impl CCVoteRecord {
         Ok(())
     }
 
+    ///TODO: What function should be created to count here?
     /// Serializes account into the target buffer
     pub fn serialize<W: Write>(self, writer: &mut W) -> Result<(), ProgramError> {
         if self.account_type == ShihonAccountType::CCVoteRecord {
@@ -114,7 +118,7 @@ impl CCVoteRecord {
     }
 }
 
-/// Deserializes VoteRecord account and checks owner program
+/// Deserializes CCVoteRecord account data
 pub fn get_cc_vote_record_data(
     program_id: &Pubkey,
     vote_record_info: &AccountInfo,
@@ -150,7 +154,7 @@ pub fn get_cc_vote_record_data(
     get_account_data::<CCVoteRecord>(program_id, vote_record_info)
 }
 
-/// Deserializes CCVoteRecord and
+/// Deserializes CCVoteRecord data for each rings
 pub fn get_cc_vote_record_data_for_challenger_ring_and_targeted_ring(
     program_id: &Pubkey,
     vote_record_info: &AccountInfo,

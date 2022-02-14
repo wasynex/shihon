@@ -1,6 +1,6 @@
 use solana_program::clock::UnixTimestamp;
 
-use crate::state::bctoken_metadata::{BcTokenConfig, BcTokenConfigArgs};
+use crate::state::bc_token_metadata::BcTokenMetadata;
 use crate::state::enums::BcTokenState;
 use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
@@ -15,17 +15,20 @@ use spl_governance_tools::account::{assert_is_valid_account, get_account_data, A
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct BcToken {
-    pub is_initialized: bool,
     /// account type
     pub account_type: ShihonAccountType,
-    pub issuer_pubkey: Pubkey,
-    pub amount_of_coin: Lamports,
-    pub number_of_issue: u64,
-    pub link_of_content: String,
-    pub issue_at: UnixTimestamp,
 
-    /// Configuration of bcToken
-    pub config: BcTokenConfig,
+    ///
+    pub issuer_pubkey: Pubkey,
+
+    ///
+    pub amount_of_coin: u64,
+
+    ///
+    pub link_of_content: String,
+
+    ///
+    pub issue_at: UnixTimestamp,
 
     /// Reserved space for future versions
     pub reserved: [u8; 8],
@@ -36,16 +39,22 @@ pub struct BcToken {
     /// bcToken name
     pub name: String,
 
+    /// bcToken Mint
+    pub bc_token_mint: Pubkey,
+
     /// state bcToken
     pub bc_token_state: BcTokenState,
 
     /// If candidate has this hash, we call him "Roydamna"
     pub mpc_key: Option<u8>,
+
+    /// Metadata of bcToken
+    pub config: BcTokenMetadata,
 }
 
 impl IsInitialized for BcToken {
     fn is_initialized(&self) -> bool {
-        self.is_initialized
+        self.account_type == ShihonAccountType::BcToken
     }
 }
 
@@ -61,10 +70,10 @@ impl BcToken {
         &self,
         bc_token_mint: &Pubkey,
     ) -> Result<(), ProgramError> {
-        if self.config.bc_token_mint == *bc_token_mint {
+        if self.bc_token_mint == *bc_token_mint {
             return Ok(());
         }
-        Err(ShihonError::InvalidGoverningTokenMint.into())
+        Err(ShihonError::InvalidBcTokenMint.into())
     }
 
     /// Asserts the given bcToken mint and holding accounts are valid for Tanistry
@@ -81,22 +90,21 @@ impl BcToken {
             get_bc_token_holding_address(program_id, bc_token, bc_token_mint);
 
         if bc_token_holding_address != *bc_token_holding {
-            return Err(ShihonError::InvalidGoverningTokenHoldingAccount.into());
+            return Err(ShihonError::InvalidBcTokenHoldingAccount.into());
         }
 
         Ok(())
     }
 
-    /// Asserts the given governing token can be deposited into the realm
-    pub fn asset_governing_tokens_deposits_allowed(
+    /// Asserts the given bcToken can be deposited into the Tanistry
+    pub fn asset_bc_tokens_deposits_allowed(
         &self,
         bc_token_mint: &Pubkey,
     ) -> Result<(), ProgramError> {
-        // If the deposit is for the community token and the realm uses community voter weight addin then panic
-        if self.config.use_community_voter_weight_addin
-            && self.config.bc_token_mint == *bc_token_mint
-        {
-            return Err(ShihonError::GoverningTokenDepositsNotAllowed.into());
+        ///TODO: create get_bc_token_account_on_tanistry func on tanistry.rs
+        // If the deposit is for the bcToken and the token same as on Tanistry using twice then panic
+        if self.get_bc_token_account_on_tanistry() && self.bc_token_mint == *bc_token_mint {
+            return Err(ShihonError::BcTokenDepositsNotAllowed.into());
         }
 
         Ok(())

@@ -16,6 +16,9 @@ pub struct BcTokenMetadata {
     /// bcToken account type
     pub account_type: ShihonAccountType,
 
+    /// what content type
+    pub content_type: ContentType,
+
     /// The slot when the metadata was captured
     pub updated_at: Slot,
 
@@ -24,9 +27,6 @@ pub struct BcTokenMetadata {
 
     /// Reserved
     pub reserved: [u8; 64],
-
-    /// what content type
-    pub content_type: ContentType,
 
     /// True if the `pubkey` can be loaded as a read-write account.
     pub is_writable: bool,
@@ -38,9 +38,13 @@ pub struct BcTokenMetadata {
 /// The content type
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
-pub enum ContentType {}
+pub enum ContentType {
+    ///
+    Ordinary,
 
-
+    ///
+    Partially,
+}
 
 impl AccountMaxSize for BcTokenMetadata {
     fn get_max_size(&self) -> Option<usize> {

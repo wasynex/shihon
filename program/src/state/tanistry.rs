@@ -18,23 +18,20 @@ use spl_governance_tools::{
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct Tanistry {
-    ///
-    pub is_initialized: bool,
+    /// account type
+    pub account_type: ShihonAccountType,
 
-    ///
+    /// kicker key
     pub kicker_pubkey: Pubkey,
 
-    ///
+    /// next tanistry id
     pub next_tanistry_id: Option<Pubkey>,
 
-    ///
+    /// previous tanistry id
     pub previous_tanistry_id: Option<Pubkey>,
 
-    ///
+    /// building key
     pub building_key: Vec<u8>,
-
-    ///
-    pub account_type: ShihonAccountType,
 
     /// Reserved space for future versions
     pub reserved: [u8; 8],
@@ -53,10 +50,7 @@ impl AccountMaxSize for Tanistry {}
 
 impl IsInitialized for Tanistry {
     fn is_initialized(&self) -> bool {
-        self.account_type == ShihonAccountType::AccountGovernance
-            || self.account_type == ShihonAccountType::ProgramGovernance
-            || self.account_type == ShihonAccountType::MintGovernance
-            || self.account_type == ShihonAccountType::TokenGovernance
+        self.account_type == ShihonAccountType::Tanistry
     }
 }
 
@@ -80,6 +74,41 @@ impl Tanistry {
         };
 
         Ok(seeds)
+    }
+    /// these func moved from modules/utils.rs
+    /// for on inside the Tanistry
+    fn make_mpc_key(first_candidate: Pubkey, second_candidate: Pubkey) -> Pubkey {
+        unimplemented!();
+    }
+
+    fn make_building_hash() {
+        unimplemented!();
+    }
+
+    fn make_triple(candidate_list: Vec<Pubkey>) {
+        unimplemented!();
+    }
+
+    fn get_triple(candidate: Pubkey) {
+        unimplemented!();
+    }
+
+    fn get_my_buddy_candidate(me: Pubkey) -> Pubkey {
+        unimplemented!();
+    }
+
+    /// these func moved from modules/utils.rs
+    /// for pinhole address
+    fn drop_address() {
+        unimplemented!();
+    }
+    /// for pinhole address
+    fn pull_address() {
+        unimplemented!();
+    }
+    /// getting opposite address(wallet)
+    fn get_opposite_address(me: Pubkey) -> Pubkey {
+        unimplemented!();
     }
 }
 
@@ -246,4 +275,22 @@ pub fn assert_valid_create_tanistry_args(
     assert_is_valid_tanistry_config(tanistry_config)?;
 
     Ok(())
+}
+
+/// these funcs moved from modules/value.rs
+/// sum of members of one tanistry
+fn get_tanistry_value() -> u64 {
+    unimplemented!();
+}
+/// sum of 1,3,5 of tanistry value
+fn get_building_value() -> u64 {
+    unimplemented!();
+}
+/// sum of both wallet (α + β)
+fn get_ring_value() -> u64 {
+    unimplemented!();
+}
+
+fn get_cc_value() -> u64 {
+    unimplemented!();
 }

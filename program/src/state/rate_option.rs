@@ -11,12 +11,15 @@ use crate::{error::ShihonError, PROGRAM_AUTHORITY_SEED};
 
 use crate::state::enums::ShihonAccountType;
 
-/// Account PDA seeds: ['governance', proposal, signatory]
+/// Account PDA seeds: []
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct RateOption {
     /// account type
     pub account_type: ShihonAccountType,
+
+    /// Which Roydamna created this RateOption
+    pub issuer_roydamna: Pubkey,
 
     /// MixContentRecord
     pub mix_content_record: Pubkey,
@@ -115,4 +118,25 @@ pub fn get_signatory_record_data_for_seeds(
     }
 
     get_signatory_record_data(program_id, signatory_record_info)
+}
+
+/// these funcs moved from modules/index.rs
+fn assert_can_candidate() -> bool {
+    unimplemented!();
+}
+
+fn calculate_diversity_index() -> bool {
+    unimplemented!();
+}
+
+fn assert_can_blooded() -> bool {
+    unimplemented!();
+}
+
+fn get_higher_diversity_index_candidate_list() -> Vec<Pubkey> {
+    unimplemented!();
+}
+
+fn get_upright_token_index() -> u64 {
+    unimplemented!();
 }

@@ -59,6 +59,7 @@ impl IsInitialized for OutsideBuyerRecord {
     }
 }
 ///TODO: not yet fix this associated functions
+/// I need pull the data from RateOption for making these functions
 impl OutsideBuyerRecord {
     /// Checks whether the provided exceeded rating token Authority signed transaction
     pub fn assert_outside_buyer_token_owner(
@@ -128,6 +129,7 @@ impl OutsideBuyerRecord {
         Ok(())
     }
 
+    /// Determine the multiplier for the purchased tokens and set the refundable period.
     /// Asserts TokenOwner can withdraw tokens from bought exceeded token
     pub fn assert_can_refund_for_exceeded_rating_tokens(&self) -> Result<(), ProgramError> {
         if self.unrelinquished_votes_count > 0 {
@@ -139,15 +141,6 @@ impl OutsideBuyerRecord {
         }
 
         Ok(())
-    }
-
-    /// Decreases outstanding_proposal_count
-    pub fn decrease_outstanding_proposal_count(&mut self) {
-        // Previous versions didn't use the count and it can be already 0
-        if self.outstanding_proposal_count != 0 {
-            self.outstanding_proposal_count =
-                self.outstanding_proposal_count.checked_sub(1).unwrap();
-        }
     }
 
     /// Resolves voter's weight using either the amount deposited into the realm or weight provided by voter weight addin (if configured)
@@ -290,4 +283,18 @@ pub fn get_outside_buyer_token_owner_record_data_for_content_owner(
     }
 
     get_outside_buyer_token_owner_record_data(program_id, outside_buyer_token_owner_record_info)
+}
+
+
+/// these func moved from moludes/value.rs
+fn get_self_rate_value() -> u64 {
+    unimplemented!();
+}
+
+fn get_enable_sellout_value() -> u64 {
+    unimplemented!();
+}
+
+fn get_already_sold_out_value() -> u64 {
+    unimplemented!();
 }

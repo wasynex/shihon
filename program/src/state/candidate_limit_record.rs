@@ -31,10 +31,11 @@ pub struct CandidateLimitRecord {
     pub account_type: ShihonAccountType,
 
     /// The Tanistry the CandidateLimitRecord belongs to
-    pub tanistry: Pubkey,
+    pub belonging_tanistry: Pubkey,
 
-    /// number of candidate
-    pub number_of_candidate: u32,
+    /// number of candidate count
+    ///Lamport envisioned a bakery with a numbering machine at its entrance so each candidate is given a unique number.
+    pub number_of_candidate_count: u32,
 
     /// Candidate Token Mint the CandidateLimitRecord holds deposit for
     pub candidate_token_mint: Pubkey,
@@ -44,11 +45,8 @@ pub struct CandidateLimitRecord {
     pub candidate_token_owner: Pubkey,
 
     /// The amount of candidate tokens deposited into the Tanistry
-    /// This is to use it as self-rating
+    /// How much pay did candidate as self-rating
     pub candidate_token_deposit_amount: u64,
-
-    /// candidate(bcToken)
-    pub candidate: Pubkey,
 }
 
 impl AccountMaxSize for CandidateLimitRecord {
@@ -62,31 +60,25 @@ impl IsInitialized for CandidateLimitRecord {
         self.account_type == ShihonAccountType::CandidateLimitRecord
     }
 }
-///TODO: not yet fix this associated functions
-/// we need to write the Limit code here
+
 impl CandidateLimitRecord {
-    /// Checks whether the provided Governance Authority signed transaction
+    /// Checks whether the provided bcToken Authority signed transaction
     pub fn assert_token_owner_or_delegate_is_signer(
         &self,
-        governance_authority_info: &AccountInfo,
+        candidate_token_authority_info: &AccountInfo,
     ) -> Result<(), ProgramError> {
-        if governance_authority_info.is_signer {
-            if &self.candidate_token_owner == governance_authority_info.key {
+        if candidate_token_authority_info.is_signer {
+            if &self.candidate_token_owner == candidate_token_authority_info.key {
                 return Ok(());
-            }
-
-            if let Some(candidate_delegate) = self.candidate_delegate {
-                if &governance_delegate == governance_authority_info.key {
-                    return Ok(());
-                }
             };
         }
 
-        Err(ShihonError::GoverningTokenOwnerOrDelegateMustSign.into())
+        Err(ShihonError::CandidateTokenOwnerMustSign.into())
     }
 
-    /// Asserts TokenOwner has enough tokens to be allowed to create proposal and doesn't have any outstanding proposals
-    pub fn assert_can_create_proposal(
+    /// TODO: we need to write the Limit Bar's code here.
+    /// Asserts TokenOwner has enough tokens to be allowed to candidate
+    pub fn assert_can_create_candidate_limit_record(
         &self,
         realm_data: &Realm,
         config: &GovernanceConfig,
@@ -114,6 +106,12 @@ impl CandidateLimitRecord {
         Ok(())
     }
 
+    /// these funcs moved from modules/index.rs
+    fn get_candidate_limit_bar() -> bool {
+        unimplemented!();
+    }
+
+    /// and here.
     /// Asserts TokenOwner has enough tokens to be allowed to create governance
     pub fn assert_can_create_governance(
         &self,
@@ -137,29 +135,14 @@ impl CandidateLimitRecord {
         Ok(())
     }
 
-    /// Asserts TokenOwner can withdraw tokens from Realm
-    pub fn assert_can_withdraw_governing_tokens(&self) -> Result<(), ProgramError> {
-        if self.unrelinquished_votes_count > 0 {
-            return Err(ShihonError::AllVotesMustBeRelinquishedToWithdrawGoverningTokens.into());
-        }
-
-        if self.outstanding_proposal_count > 0 {
-            return Err(ShihonError::AllProposalsMustBeFinalisedToWithdrawGoverningTokens.into());
-        }
-
-        Ok(())
-    }
-
-    /// Decreases outstanding_proposal_count
-    pub fn decrease_outstanding_proposal_count(&mut self) {
-        // Previous versions didn't use the count and it can be already 0
-        if self.outstanding_proposal_count != 0 {
-            self.outstanding_proposal_count =
-                self.outstanding_proposal_count.checked_sub(1).unwrap();
+    /// Increases number_of_candidate_count
+    pub fn increase_number_of_candidate_count(&self) {
+        if self.number_of_candidate_count != 0 {
+            self.number_of_candidate_count = self.number_of_candidate_count.checked_sub(1).unwrap();
         }
     }
 
-    /// Resolves voter's weight using either the amount deposited into the realm or weight provided by voter weight addin (if configured)
+    /// no need func now
     pub fn resolve_voter_weight(
         &self,
         program_id: &Pubkey,
@@ -258,7 +241,7 @@ pub fn get_candidate_limit_record_data_for_tanistry(
     let candidate_limit_record_data =
         get_candidate_limit_record_data(program_id, candidate_limit_record_info)?;
 
-    if candidate_limit_record_data.tanistry != *tanistry {
+    if candidate_limit_record_data.belonging_tanistry != *tanistry {
         return Err(ShihonError::InvalidRealmForTokenOwnerRecord.into());
     }
 

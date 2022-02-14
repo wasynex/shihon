@@ -31,10 +31,10 @@ use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct MixContentRecord {
     ///
-    pub is_initialized: bool,
-    
-    /// Mix on the option is not resolved yet
-    pub link: Pubkey,
+    pub account_type: ShihonAccountType,
+
+    /// Encrypted link
+    pub encrypted_link: String,
 
     /// rater candidate (It's you!)
     pub rater_candidate: Pubkey,
@@ -62,12 +62,22 @@ pub enum OptionMixResult {
     Defeated,
 }
 
-///TODO: need to make mix modules with rating function
+impl AccountMaxSize for MixContentRecord {}
+
 impl IsInitialized for MixContentRecord {
     fn is_initialized(&self) -> bool {
-        self.is_initialized
+        self.account_type == ShihonAccountType::MixContentRecord
     }
 }
+
+impl MixContentRecord {
+    /// for mixing the content
+    fn multi_sig_1() {
+        unimplemented!();
+    }
+}
+
+///TODO: need to fix and rename from here
 /// Deserializes Proposal and validates it belongs to the given Governance and Governing Mint
 pub fn get_proposal_data_for_governance_and_governing_mint(
     program_id: &Pubkey,
@@ -130,7 +140,7 @@ pub fn get_proposal_address<'a>(
 /// Assert options to create proposal are valid for the Proposal vote_type
 pub fn assert_valid_proposal_options(
     options: &[String],
-    vote_type: &RateType,
+    vote_type: &R,
 ) -> Result<(), ProgramError> {
     if options.is_empty() {
         return Err(ShihonError::InvalidProposalOptions.into());
