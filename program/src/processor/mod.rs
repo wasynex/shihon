@@ -1,17 +1,19 @@
-pub mod process_approve_kicker_coin;
-pub mod process_bump_self_rate;
-pub mod process_buy_exceeded_rate_token;
-pub mod process_candidate;
-pub mod process_create_bc_token;
-pub mod process_create_candidate_limit_record;
-pub mod process_create_cc_vote_record;
-pub mod process_create_rate_other_record;
-pub mod process_create_token_buyer_record;
-pub mod process_crowning;
-pub mod process_kick_to_coordinator;
-pub mod process_rate_other;
-pub mod process_sell_exceeded_rate_token;
-pub mod process_vote_for_cc;
+mod process_approve_kicker_coin;
+mod process_bump_self_rate;
+mod process_buy_exceeded_rate_token;
+mod process_candidate;
+mod process_create_bc_token;
+mod process_create_candidate_limit_record;
+mod process_create_cc_vote_record;
+mod process_create_rate_other_record;
+mod process_create_token_buyer_record;
+mod process_crowning;
+mod process_kick_to_coordinator;
+mod process_rate_other;
+mod process_sell_exceeded_rate_token;
+mod process_vote_for_cc;
+
+use crate::instruction::ShihonInstruction;
 
 use process_approve_kicker_coin::*;
 use process_bump_self_rate::*;
@@ -28,9 +30,10 @@ use process_rate_other::*;
 use process_sell_exceeded_rate_token::*;
 use process_vote_for_cc::*;
 
-use crate::instruction::ShihonInstruction;
-
-use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubkey::Pubkey};
+use solana_program::{
+    account_info::AccountInfo, borsh::try_from_slice_unchecked, entrypoint::ProgramResult, msg,
+    program_error::ProgramError, pubkey::Pubkey,
+};
 
 /// Processes an instruction
 pub fn process_instruction(
@@ -38,10 +41,14 @@ pub fn process_instruction(
     accounts: &[AccountInfo],
     input: &[u8],
 ) -> ProgramResult {
+    msg!("VERSION:{:?}", env!("CARGO_PKG_VERSION"));
+    // Use try_from_slice_unchecked to support forward compatibility of newer UI with older program
+    let instruction: ShihonInstruction =
+        try_from_slice_unchecked(input).map_err(|_| ProgramError::InvalidInstructionData)?;
     unimplemented!();
 }
 
-fn is_go_forward_to_process() {
+fn assert_can_go_forward_to_the_process() {
     unimplemented!();
 }
 
