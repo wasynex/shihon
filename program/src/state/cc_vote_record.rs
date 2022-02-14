@@ -24,7 +24,7 @@ use crate::state::enums::ShihonAccountType;
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct CCVoteChoice {
     /// Challenger Ring
-    pub challenger_ring: Option<Pubkey>,
+    pub challenger_ring: Pubkey,
 
     /// which ring need to make CC
     pub target_ring: Option<Pubkey>,
@@ -51,7 +51,7 @@ pub enum Vote {
     Push,
 }
 
-/// Proposal VoteRecord
+/// CC Vote Record
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct CCVoteRecord {
     /// account type
@@ -127,8 +127,8 @@ pub fn get_cc_vote_record_data(
         try_from_slice_unchecked(&vote_record_info.data.borrow())?;
 
     // If the account is V1 version then translate to V2
-    if account_type == ShihonAccountType::VoteRecordV1 {
-        let vote_record_data_v1 = get_account_data::<VoteRecordV1>(program_id, vote_record_info)?;
+    if account_type == ShihonAccountType::CCVoteRecord {
+        let vote_record_data_v1 = get_account_data::<CCVoteRecord>(program_id, vote_record_info)?;
 
         let (vote, voter_weight) = match vote_record_data_v1.vote_weight {
             VoteWeightV1::Yes(weight) => (
@@ -160,7 +160,7 @@ pub fn get_cc_vote_record_data_for_challenger_ring_and_targeted_ring(
     vote_record_info: &AccountInfo,
     proposal: &Pubkey,
     governing_token_owner: &Pubkey,
-) -> Result<VoteRecordV2, ProgramError> {
+) -> Result<CCVoteRecord, ProgramError> {
     let vote_record_data = get_vote_record_data(program_id, vote_record_info)?;
 
     if vote_record_data.proposal != *proposal {

@@ -1,16 +1,18 @@
-use crate::error::ShihonError::InvalidInstruction;
-use crate::state::{bctoken::{get_bc_token_address, get_bc_token_holding_address, BcToken},
-kicker_coin_owner_record::{get_kicker_coin_owner_record_address},
-}
+use crate::{
+    state::{
+        bc_token::{get_bc_token_address, get_bc_token_holding_address, BcToken},
+        bc_token_metadata::BcTokenMetadata,
+        kicker_coin_owner_record::get_kicker_coin_owner_record_address,
+    },
+    tools::bpf_loader_upgradeable::get_program_data_address,
+};
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
+    bpf_loader_upgradeable,
     instruction::{AccountMeta, Instruction},
-    msg,
-    program_error::ProgramError,
     pubkey::Pubkey,
     system_program, sysvar,
 };
-use std::convert::TryInto;
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 #[repr(C)]
@@ -34,7 +36,7 @@ pub enum ShihonInstruction {
     CreateBcToken {
         name: String,
         amount: u64,
-        // config_args: BcTokenConfigArgs,
+        config: BcTokenMetadata,
     },
 
     DiscardBcToken,
@@ -108,7 +110,7 @@ pub enum ShihonInstruction {
     /// 11. `[]` System program
     /// 12. `[]` Sysvar Rent
     Candidate {
-        /// for as self-rating
+        coordinator: Pubkey,
         amount: u64,
     },
     ////// Terminate 1 ~ Terminate 2 and Terminate 4 ~ Terminate 5
@@ -129,7 +131,8 @@ pub enum ShihonInstruction {
     /// 10. `[]` System program
     /// 11. `[]` Sysvar Rent
     Mix {
-        link: String,
+        time_shift_a: u64,
+        time_shift_b: u64,
     },
     ///
     /// Accounts expected:
@@ -199,6 +202,7 @@ pub enum ShihonInstruction {
     /// 8. `[]` Clock sysvar
     /// 9. `[]` Sysvar Rent
     Buy {
+        token: Pubkey,
         amount: u64,
     },
 
@@ -230,6 +234,7 @@ pub fn create_bc_token(
     // Args
     name: String,
     amount: u64,
+    config: BcTokenMetadata,
 ) -> Instruction {
     let bc_token_address = get_bc_token_address(program_id, &name);
     let bc_token_holding_address =
@@ -247,7 +252,11 @@ pub fn create_bc_token(
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = ShihonInstruction::CreateBcToken { name, amount };
+    let instruction = ShihonInstruction::CreateBcToken {
+        name,
+        amount,
+        config,
+    };
 
     Instruction {
         program_id: *program_id,
@@ -508,7 +517,6 @@ pub fn bump_self_rate(
     }
 }
 
-
 /// sell instruction
 #[allow(clippy::too_many_arguments)]
 pub fn sell_exceeded_rate_token(
@@ -553,7 +561,6 @@ pub fn sell_exceeded_rate_token(
         data: instruction.try_to_vec().unwrap(),
     }
 }
-
 
 #[allow(clippy::too_many_arguments)]
 /// buy instruction
@@ -600,7 +607,6 @@ pub fn buy_exceeded_rate_token(
     }
 }
 
-
 /// Choose the crown on Roydamna instruction
 pub fn crowning(
     program_id: &Pubkey,
@@ -635,7 +641,7 @@ pub fn crowning(
     }
 }
 
-/// probably this function would join to kicking_coin function
+/// probably this function would join to kicking_coin function, so this func no needed
 pub fn kicking_to_next_coordinator(
     program_id: &Pubkey,
     // Accounts

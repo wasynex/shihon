@@ -23,13 +23,13 @@ pub enum ShihonError {
     #[error("Invalid realm")]
     InvalidRealm,
 
-    /// Invalid Governing Token Mint
-    #[error("Invalid Governing Token Mint")]
-    InvalidGoverningTokenMint,
+    /// Invalid bcToken Mint
+    #[error("Invalid bcToken Mint")]
+    InvalidBcTokenMint,
 
-    /// Governing Token Owner must sign transaction
-    #[error("Governing Token Owner must sign transaction")]
-    GoverningTokenOwnerMustSign,
+    /// Candidate Token Owner must sign transaction
+    #[error("Candidate Token Owner must sign transaction")]
+    CandidateTokenOwnerMustSign,
 
     /// Governing Token Owner or Delegate  must sign transaction
     #[error("Governing Token Owner or Delegate  must sign transaction")]
@@ -59,13 +59,13 @@ pub enum ShihonError {
     #[error("Invalid Signatory account address")]
     InvalidSignatoryAddress,
 
-    /// Signatory already signed off
-    #[error("Signatory already signed off")]
-    SignatoryAlreadySignedOff,
+    /// KickerCoin already kicked off
+    #[error("KickerCoin already kicked off")]
+    KickerCoinAlreadyKickedOff,
 
-    /// Signatory must sign
-    #[error("Signatory must sign")]
-    SignatoryMustSign,
+    /// KickerCoin holder must sign
+    #[error("KickerCoin holder must sign")]
+    KickerCoinHolderMustSign,
 
     /// Invalid Proposal Owner
     #[error("Invalid Proposal Owner")]
@@ -282,9 +282,9 @@ pub enum ShihonError {
     #[error("Realm authority must sign")]
     RealmAuthorityMustSign,
 
-    /// Invalid governing token holding account
-    #[error("Invalid governing token holding account")]
-    InvalidGoverningTokenHoldingAccount,
+    /// Invalid  bcToken holding account
+    #[error("Invalid  bc_token holding account")]
+    InvalidBcTokenHoldingAccount,
 
     /// Realm council mint change is not supported
     #[error("Realm council mint change is not supported")]
@@ -334,9 +334,9 @@ pub enum ShihonError {
     #[error("TokenOwnerRecord already exists")]
     TokenOwnerRecordAlreadyExists,
 
-    /// Governing token deposits not allowed
-    #[error("Governing token deposits not allowed")]
-    GoverningTokenDepositsNotAllowed,
+    /// bcToken deposits not allowed
+    #[error("bcToken deposits not allowed")]
+    BcTokenDepositsNotAllowed,
 
     /// Invalid vote choice weight percentage
     #[error("Invalid vote choice weight percentage")]

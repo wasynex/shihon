@@ -121,11 +121,12 @@ pub fn get_signatory_record_data_for_seeds(
 }
 
 /// these funcs moved from modules/index.rs
-fn assert_can_candidate() -> bool {
+fn assert_can_candidate_before_limit() -> bool {
     unimplemented!();
 }
 
-fn calculate_diversity_index() -> bool {
+// going to move to ranistry.rs
+fn calculate_diversity_index_on_tanistry() -> bool {
     unimplemented!();
 }
 
@@ -133,7 +134,7 @@ fn assert_can_blooded() -> bool {
     unimplemented!();
 }
 
-fn get_higher_diversity_index_candidate_list() -> Vec<Pubkey> {
+fn get_higher_diversity_index_candidate_list_sort() -> Vec<Pubkey> {
     unimplemented!();
 }
 

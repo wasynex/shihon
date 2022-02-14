@@ -286,7 +286,7 @@ pub fn get_outside_buyer_token_owner_record_data_for_content_owner(
 }
 
 
-/// these func moved from moludes/value.rs
+/// these func moved from modules/value.rs
 fn get_self_rate_value() -> u64 {
     unimplemented!();
 }
