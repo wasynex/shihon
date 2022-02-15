@@ -185,9 +185,7 @@ pub enum ShihonInstruction {
     /// 8. `[]` System program
     /// 9. `[]` Clock sysvar
     /// 10. `[]` Sysvar Rent
-    Sell {
-        amount: u64,
-    },
+    Sell,
     ///
     /// Accounts expected:
     ///
@@ -302,56 +300,40 @@ pub fn kicking_coin(
     }
 }
 
-///TODO: need to fix from here to end
 /// Instruction whether the coordinator approve the KickerCoin
 #[allow(clippy::too_many_arguments)]
 pub fn approve_kicker_coin(
     program_id: &Pubkey,
     // Accounts
-    governance: &Pubkey,
-    proposal_owner_record: &Pubkey,
-    governance_authority: &Pubkey,
+    tanistry_account: &Pubkey,
+    tanistry_holding: &Pubkey,
+    tanistry_authority: &Pubkey,
+    tanistry_token_mint: &Pubkey,
     payer: &Pubkey,
-    voter_weight_record: Option<Pubkey>,
+    tanistry_index: &Pubkey,
     // Args
-    realm: &Pubkey,
-    name: String,
-    description_link: String,
-    governing_token_mint: &Pubkey,
-    vote_type: VoteType,
-    options: Vec<String>,
-    use_deny_option: bool,
-    proposal_index: u32,
+    coordinator_input: String,
 ) -> Instruction {
-    let proposal_address = get_proposal_address(
+    let tanistry_address = get_tanistry_address(
         program_id,
-        governance,
-        governing_token_mint,
-        &proposal_index.to_le_bytes(),
+        tanistry_holding,
+        tanistry_token_mint,
+        &tanistry_index.to_le_bytes(),
     );
 
     let mut accounts = vec![
-        AccountMeta::new_readonly(*realm, false),
-        AccountMeta::new(proposal_address, false),
-        AccountMeta::new(*governance, false),
-        AccountMeta::new(*proposal_owner_record, false),
-        AccountMeta::new_readonly(*governing_token_mint, false),
-        AccountMeta::new_readonly(*governance_authority, true),
+        AccountMeta::new_readonly(*tanistry_account, false),
+        AccountMeta::new(tanistry_index, false),
+        AccountMeta::new(*tanistry_holding, false),
+        AccountMeta::new(*tanistry_authority, false),
+        AccountMeta::new_readonly(*tanistry_token_mint, false),
         AccountMeta::new(*payer, true),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
     ];
 
-    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
-
-    let instruction = ShihonInstruction::Approve {
-        name,
-        description_link,
-        vote_type,
-        options,
-        use_deny_option,
-    };
+    let instruction = ShihonInstruction::Approve { coordinator_input };
 
     Instruction {
         program_id: *program_id,
@@ -364,25 +346,24 @@ pub fn approve_kicker_coin(
 pub fn deny_kicker_coin(
     program_id: &Pubkey,
     // Accounts
-    kicker_token_mint: &Pubkey,
-    kicker_coin_owner_record: &Pubkey,
+    tanistry_account: &Pubkey,
+    tanistry_token_owner_record: &Pubkey,
     bc_token_authority: &Pubkey,
     payer: &Pubkey,
+    kicker_coin_owner_record: &Pubkey,
 ) -> Instruction {
     let kicker_coin_owner_record_address =
-        get_kicker_coin_owner_record_address(program_id, kicker_token_mint, coordinator);
+        get_kicker_coin_owner_record_address(program_id, bc_token_authority, payer);
 
     let accounts = vec![
-        AccountMeta::new(*proposal, false),
-        AccountMeta::new_readonly(*token_owner_record, false),
-        AccountMeta::new_readonly(*governance_authority, true),
-        AccountMeta::new(signatory_record_address, false),
-        AccountMeta::new(*beneficiary, false),
+        AccountMeta::new_readonly(*tanistry_account, false),
+        AccountMeta::new_readonly(*tanistry_token_owner_record, false),
+        AccountMeta::new_readonly(*bc_token_authority, true),
+        AccountMeta::new(kicker_coin_owner_record_address, false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
     ];
 
-    let instruction = ShihonInstruction::Deny {
-        signatory: *signatory,
-    };
+    let instruction = ShihonInstruction::Deny;
 
     Instruction {
         program_id: *program_id,
@@ -396,39 +377,45 @@ pub fn deny_kicker_coin(
 pub fn candidate(
     program_id: &Pubkey,
     // Accounts
-    realm: &Pubkey,
-    governing_token_source: &Pubkey,
-    governing_token_owner: &Pubkey,
-    governing_token_transfer_authority: &Pubkey,
     payer: &Pubkey,
+    tanistry_account: &Pubkey,
+    candidate_token_source: &Pubkey,
+    candidate_token_holding: &Pubkey,
+    candidate_token_transfer_authority: &Pubkey,
+    candidate_token_owner_record: &Pubkey,
+    tanistry_token_holding: &Pubkey,
     // Args
     amount: u64,
     governing_token_mint: &Pubkey,
 ) -> Instruction {
-    let token_owner_record_address = get_token_owner_record_address(
+    let candidate_token_owner_record_address = get_candidate_token_owner_record_address(
         program_id,
-        realm,
-        governing_token_mint,
-        governing_token_owner,
+        tanistry_account,
+        candidate_token_source,
+        candidate_token_transfer_authority,
     );
 
-    let governing_token_holding_address =
-        get_governing_token_holding_address(program_id, realm, governing_token_mint);
+    let candidate_token_holding_address = get_tanistry_token_holding_address(
+        program_id,
+        tanistry_account,
+        candidate_token_owner_record,
+    );
 
     let accounts = vec![
-        AccountMeta::new_readonly(*realm, false),
-        AccountMeta::new(governing_token_holding_address, false),
-        AccountMeta::new(*governing_token_source, false),
-        AccountMeta::new_readonly(*governing_token_owner, true),
-        AccountMeta::new_readonly(*governing_token_transfer_authority, true),
-        AccountMeta::new(token_owner_record_address, false),
+        AccountMeta::new_readonly(*tanistry_account, false),
         AccountMeta::new(*payer, true),
-        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new(*candidate_token_source, false),
+        AccountMeta::new_readonly(*candidate_token_holding, true),
+        AccountMeta::new_readonly(*candidate_token_transfer_authority, true),
+        AccountMeta::new(kicker_coin_owner_record_address, false),
+        AccountMeta::new(tanistry_token_owner_record, true),
+        AccountMeta::new_readonly(*tanistry_token_holding, true),
         AccountMeta::new_readonly(spl_token::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = ShihonInstruction::DepositGoverningTokens { amount };
+    let instruction = ShihonInstruction::Candidate { amount };
 
     Instruction {
         program_id: *program_id,
@@ -441,28 +428,36 @@ pub fn candidate(
 pub fn rate_content(
     program_id: &Pubkey,
     // Accounts
-    realm: &Pubkey,
-    governing_token_owner: &Pubkey,
-    governing_token_mint: &Pubkey,
-    payer: &Pubkey,
+    rater_candidate: &Pubkey,
+    rater_token_owner: &Pubkey,
+    buddy_content_holder: &Pubkey,
+    init_content_holder: &Pubkey,
+    coordinator: &Pubkey,
+    rater_token_mint_for_rating: &Pubkey,
+    mix_content_record: &Pubkey,
+    // Args
+    amount: u64,
 ) -> Instruction {
-    let token_owner_record_address = get_token_owner_record_address(
+    let rate_other_record_address = get_rate_other_record_address(
         program_id,
-        realm,
-        governing_token_mint,
-        governing_token_owner,
+        rater_candidate,
+        rater_token_mint_for_rating,
+        init_content_holder,
     );
 
     let accounts = vec![
-        AccountMeta::new_readonly(*realm, false),
-        AccountMeta::new_readonly(*governing_token_owner, false),
-        AccountMeta::new(token_owner_record_address, false),
-        AccountMeta::new_readonly(*governing_token_mint, false),
-        AccountMeta::new(*payer, true),
+        AccountMeta::new(*rater_candidate, true),
+        AccountMeta::new_readonly(*rater_token_owner, false),
+        AccountMeta::new(*buddy_content_holder false),
+        AccountMeta::new(*init_content_holder false),
+        AccountMeta::new_readonly(coordinator, false),
+        AccountMeta::new(*mix_content_record, false),
         AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
     ];
 
-    let instruction = ShihonInstruction::CreateTokenOwnerRecord {};
+    let instruction = ShihonInstruction::Rate { amount };
 
     Instruction {
         program_id: *program_id,
@@ -476,39 +471,37 @@ pub fn rate_content(
 pub fn bump_self_rate(
     program_id: &Pubkey,
     // Accounts
-    realm: &Pubkey,
-    governing_token_source: &Pubkey,
-    governing_token_owner: &Pubkey,
-    governing_token_transfer_authority: &Pubkey,
+    candidate_account: &Pubkey,
+    candidate_token_source: &Pubkey,
+    candidate_token_owner: &Pubkey,
+    candidate_token_transfer_authority: &Pubkey,
     payer: &Pubkey,
+    candidate_token_owner_record: &Pubkey,
     // Args
     amount: u64,
-    governing_token_mint: &Pubkey,
 ) -> Instruction {
-    let token_owner_record_address = get_token_owner_record_address(
+    let candidate_token_owner_record_address = get_candidate_token_owner_record_address(
         program_id,
-        realm,
-        governing_token_mint,
-        governing_token_owner,
+        candidate_account,
+        candidate_token_source,
+        candidate_token_owner,
     );
 
-    let governing_token_holding_address =
-        get_governing_token_holding_address(program_id, realm, governing_token_mint);
+    let candidate_token_holding_address =
+        get_candidate_token_holding_address(program_id, candidate_account, candidate_token_owner);
 
     let accounts = vec![
-        AccountMeta::new_readonly(*realm, false),
-        AccountMeta::new(governing_token_holding_address, false),
-        AccountMeta::new(*governing_token_source, false),
-        AccountMeta::new_readonly(*governing_token_owner, true),
-        AccountMeta::new_readonly(*governing_token_transfer_authority, true),
-        AccountMeta::new(token_owner_record_address, false),
-        AccountMeta::new(*payer, true),
+        AccountMeta::new_readonly(*candidate_account, false),
+        AccountMeta::new(candidate_token_holding_address, false),
+        AccountMeta::new(*candidate_token_source, false),
+        AccountMeta::new_readonly(*candidate_token_owner, true),
+        AccountMeta::new(candidate_token_owner_record_address, false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(spl_token::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = ShihonInstruction::DepositGoverningTokens { amount };
+    let instruction = ShihonInstruction::Bump { amount };
 
     Instruction {
         program_id: *program_id,
@@ -522,38 +515,29 @@ pub fn bump_self_rate(
 pub fn sell_exceeded_rate_token(
     program_id: &Pubkey,
     // Accounts
-    realm: &Pubkey,
-    governed_mint: &Pubkey,
-    governed_mint_authority: &Pubkey,
-    token_owner_record: &Pubkey,
+    seller: &Pubkey,
+    sellout_mint: &Pubkey,
+    sellout_mint_authority: &Pubkey,
+    outside_buyer_record: &Pubkey,
     payer: &Pubkey,
-    governance_authority: &Pubkey,
-    voter_weight_record: Option<Pubkey>,
-    // Args
-    config: GovernanceConfig,
-    transfer_mint_authorities: bool,
+    tanistry_authority: &Pubkey,
 ) -> Instruction {
-    let mint_governance_address = get_mint_governance_address(program_id, realm, governed_mint);
+    let mint_governance_address = get_sellout_mint_address(program_id, seller, sellout_mint);
 
     let mut accounts = vec![
-        AccountMeta::new_readonly(*realm, false),
+        AccountMeta::new_readonly(*seller, false),
         AccountMeta::new(mint_governance_address, false),
-        AccountMeta::new(*governed_mint, false),
-        AccountMeta::new_readonly(*governed_mint_authority, true),
-        AccountMeta::new_readonly(*token_owner_record, false),
+        AccountMeta::new(*sellout_mint, false),
+        AccountMeta::new_readonly(*sellout_mint_authority, true),
+        AccountMeta::new_readonly(*outside_buyer_record, false),
         AccountMeta::new(*payer, true),
         AccountMeta::new_readonly(spl_token::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
-        AccountMeta::new_readonly(*governance_authority, true),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
     ];
 
-    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
-
-    let instruction = ShihonInstruction::CreateMintGovernance {
-        config,
-        transfer_mint_authorities,
-    };
+    let instruction = ShihonInstruction::Sell;
 
     Instruction {
         program_id: *program_id,
@@ -562,23 +546,31 @@ pub fn sell_exceeded_rate_token(
     }
 }
 
+/// 0. `[signer]` Outside Buyer account
+/// 1. `[writable]` TokenSelloutRecord account. PDA seeds: ['tanistry',bcToken, tanistry_token_mint, tanistry_token_owner]
+/// 2. `[writable]` The Seller's token account for selling own token as NFT
+/// 3. `[writable]` The Buyer's token account to buy NFT of Candidate
+/// 4. `[]` The Buyer's token account for the token they will receive refund if won the game
+/// 5. `[Writable]` The Tanistry account holding the Tanistry info  PDA seeds: []
+/// 6. `[]` The seller token Mint
+/// 7. `[]` System program
+/// 8. `[]` Clock sysvar
+/// 9. `[]` Sysvar Rent
 #[allow(clippy::too_many_arguments)]
 /// buy instruction
 pub fn buy_exceeded_rate_token(
     program_id: &Pubkey,
     // Accounts
-    realm: &Pubkey,
-    governed_token: &Pubkey,
-    governed_token_owner: &Pubkey,
-    token_owner_record: &Pubkey,
+    buyer: &Pubkey,
+    outside_buyer_record: &Pubkey,
+    buyer_token: &Pubkey,
+    buyer_token_owner: &Pubkey,
     payer: &Pubkey,
-    governance_authority: &Pubkey,
-    voter_weight_record: Option<Pubkey>,
     // Args
-    config: GovernanceConfig,
-    transfer_account_authorities: bool,
+    token: &Pubkey,
+    amount: u64,
 ) -> Instruction {
-    let token_governance_address = get_token_governance_address(program_id, realm, governed_token);
+    let token_governance_address = get_outside_buyer_token_address(program_id, buyer, buyer_token);
 
     let mut accounts = vec![
         AccountMeta::new_readonly(*realm, false),
@@ -593,12 +585,7 @@ pub fn buy_exceeded_rate_token(
         AccountMeta::new_readonly(*governance_authority, true),
     ];
 
-    with_voter_weight_accounts(program_id, &mut accounts, realm, voter_weight_record);
-
-    let instruction = ShihonInstruction::CreateTokenGovernance {
-        config,
-        transfer_account_authorities,
-    };
+    let instruction = ShihonInstruction::Buy { token, amount };
 
     Instruction {
         program_id: *program_id,
@@ -611,41 +598,31 @@ pub fn buy_exceeded_rate_token(
 pub fn crowning(
     program_id: &Pubkey,
     // Accounts
-    governance_authority: &Pubkey,
+    coordinator: &Pubkey,
+    kicker_coin_authority: &Pubkey,
+    kicker_coin_owner_record: &Pubkey,
     // Args
-    realm: &Pubkey,
-    governing_token_mint: &Pubkey,
-    governing_token_owner: &Pubkey,
-    new_governance_delegate: &Option<Pubkey>,
+    crown: &Pubkey,
 ) -> Instruction {
-    let vote_record_address = get_token_owner_record_address(
-        program_id,
-        realm,
-        governing_token_mint,
-        governing_token_owner,
-    );
+    let kicker_coin_owner_record_address =
+        get_kicker_coin_owner_record_address(program_id, crown, coordinator);
 
     let accounts = vec![
-        AccountMeta::new_readonly(*governance_authority, true),
-        AccountMeta::new(vote_record_address, false),
+        AccountMeta::new_readonly(*coordinator, true),
+        AccountMeta::new(kicker_coin_onwer_record_address, false),
+        AccountMeta::new(*kicker_coin_owner_record, false),
+        AccountMeta::new_readonly(*governing_token_mint, false),
+        AccountMeta::new_readonly(*kicker_coin_authority, true),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
     ];
 
-    let instruction = ShihonInstruction::SetGovernanceDelegate {
-        new_governance_delegate: *new_governance_delegate,
-    };
+    let instruction = ShihonInstruction::Crowning { crown };
 
     Instruction {
         program_id: *program_id,
         accounts,
         data: instruction.try_to_vec().unwrap(),
     }
-}
-
-/// probably this function would join to kicking_coin function, so this func no needed
-pub fn kicking_to_next_coordinator(
-    program_id: &Pubkey,
-    // Accounts
-    // Args
-) -> Instruction {
-    unimplemented!();
 }
