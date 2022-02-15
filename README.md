@@ -33,19 +33,6 @@ For more Solana specifications, read
 
 
 
-## Author's Telephone Number
-
-Simon W. Parker
-
-Mail Address: wasyne@xmail.net
-
-C076E9D1F122DFD3D6FD5E1077D68E41584840C8
-
-Telegram: [@wasyne](https://t.me/wasyne)
-
-GitLab: [@wasyne](https://gitlab.com/wasyne/)
-
-
 ---------------------
 
 _Please keep in mind this project is in under construction now, and keen to reach early alpha versions as soon as possible. Please post any issue to the [Issue Tracker](https://gitlab.com/shihonics/shihon/-/issues). If you have any ideas and fixes do not hesitate to [merge request](https://gitlab.com/shihonics/shihon/-/merge_requests)_
