@@ -6,3 +6,7 @@ use solana_program::{
     sysvar::Sysvar,
 };
 use spl_governance_tools::account::create_and_serialize_account_signed;
+
+pub fn sell_exceeded_rate_token(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+    unimplemented!();
+}
