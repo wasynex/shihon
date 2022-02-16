@@ -40,7 +40,7 @@ impl IsInitialized for KickerCoinOwnerRecord {
 impl KickerCoinOwnerRecord {
     /// Checks KickerCoin hasn't kicked off yet and is transaction by KickerCoin holder
     pub fn assert_can_kick_off(&self, kicker_coin_info: &AccountInfo) -> Result<(), ProgramError> {
-        if self.kick_off {
+        if self.is_kick_off {
             return Err(ShihonError::KickerCoinAlreadyKickedOff.into());
         }
 
@@ -53,7 +53,7 @@ impl KickerCoinOwnerRecord {
 
     /// Checks KickerCoin owner record can be removed from KickerCoinOwnerRecord
     pub fn assert_can_remove_kicker_coin_owner(&self) -> Result<(), ProgramError> {
-        if self.kick_off {
+        if self.is_kick_off {
             return Err(ShihonError::KickerCoinAlreadyKickedOff.into());
         }
 

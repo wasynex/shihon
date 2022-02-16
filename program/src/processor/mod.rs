@@ -1,3 +1,5 @@
+//! Program processor
+
 mod process_approve_kicker_coin;
 mod process_bump_self_rate;
 mod process_buy_exceeded_rate_token;
@@ -5,8 +7,8 @@ mod process_candidate;
 mod process_create_bc_token;
 mod process_create_candidate_limit_record;
 mod process_create_cc_vote_record;
+mod process_create_outside_buyer_record;
 mod process_create_rate_other_record;
-mod process_create_token_buyer_record;
 mod process_crowning;
 mod process_kick_to_coordinator;
 mod process_rate_other;
@@ -22,8 +24,8 @@ use process_candidate::*;
 use process_create_bc_token::*;
 use process_create_candidate_limit_record::*;
 use process_create_cc_vote_record::*;
+use process_create_outside_buyer_record::*;
 use process_create_rate_other_record::*;
-use process_create_token_buyer_record::*;
 use process_crowning::*;
 use process_kick_to_coordinator::*;
 use process_rate_other::*;
@@ -49,10 +51,11 @@ pub fn process_instruction(
     unimplemented!();
 }
 
+/// Checks whether bcToken account can go forward to the next process.
 fn assert_can_go_forward_to_the_process() {
     unimplemented!();
 }
-
+/// Checks that how many percentage of process has done by all the member
 fn count_percentage_done_process_member() {
     unimplemented!();
 }

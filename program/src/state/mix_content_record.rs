@@ -71,7 +71,7 @@ impl IsInitialized for MixContentRecord {
 }
 
 impl MixContentRecord {
-    /// for mixing the content
+    /// mixing the content for first step
     fn multi_sig_1() {
         unimplemented!();
     }

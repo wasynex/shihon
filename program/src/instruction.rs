@@ -28,7 +28,7 @@ pub enum ShihonInstruction {
     ///     The account will be created with the bcToken PDA as its owner
     /// 4. `[signer]` The account of the person as Candidate taking the Tanistry.
     /// 5. `[writable]` Candidate's self-rating Coin Token Holding account PDA seeds: ['bcToken',bcToken,candidate_mint]
-    /// 6. `[writable]` BcTokenConfig account. PDA seeds: ['bcToken-config', bcToken]
+    /// 6. `[writable]` BcTokenMetadata account. PDA seeds: ['bcToken-metadata', bcToken]
     /// 7. `[]` System
     /// 8. `[]` SPL Token
     /// 9. `[]` Sysvar Rent

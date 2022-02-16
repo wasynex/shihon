@@ -55,7 +55,7 @@ impl IsInitialized for Tanistry {
 }
 
 impl Tanistry {
-    /// Returns Tanistry PDA seeds
+    /// Returns Tanistry PDA seeds (All in one)
     pub fn get_tanistry_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
         let seeds = match self.account_type {
             ShihonAccountType::AccountGovernance => {
@@ -172,7 +172,7 @@ pub fn get_program_tanistry_address<'a>(
     .0
 }
 
-/// Returns MintTanistry PDA seeds
+/// Returns Mint Tanistry PDA seeds
 pub fn get_mint_tanistry_address_seeds<'a>(
     bc_token: &'a Pubkey,
     tanistry_mint: &'a Pubkey,
@@ -182,7 +182,7 @@ pub fn get_mint_tanistry_address_seeds<'a>(
     [b"mint-tanistry", bc_token.as_ref(), tanistry_mint.as_ref()]
 }
 
-/// Returns MintTanistry PDA address
+/// Returns Mint Tanistry PDA address
 pub fn get_mint_tanistry_address<'a>(
     program_id: &Pubkey,
     bc_token: &'a Pubkey,
@@ -195,7 +195,7 @@ pub fn get_mint_tanistry_address<'a>(
     .0
 }
 
-/// Returns TokenGovernance PDA seeds
+/// Returns Token Tanistry PDA seeds
 pub fn get_token_tanistry_address_seeds<'a>(
     bc_token: &'a Pubkey,
     tanistry_token: &'a Pubkey,
@@ -209,7 +209,7 @@ pub fn get_token_tanistry_address_seeds<'a>(
     ]
 }
 
-/// Returns TokenTanistry PDA address
+/// Returns Token Tanistry PDA address
 pub fn get_token_tanistry_address<'a>(
     program_id: &Pubkey,
     realm: &'a Pubkey,
@@ -222,7 +222,7 @@ pub fn get_token_tanistry_address<'a>(
     .0
 }
 
-/// Returns AccountTanistry PDA seeds
+/// Returns Account Tanistry PDA seeds
 pub fn get_account_tanistry_address_seeds<'a>(
     realm: &'a Pubkey,
     governed_account: &'a Pubkey,
