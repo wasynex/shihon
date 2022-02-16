@@ -27,7 +27,7 @@ pub enum ShihonAccountType {
     /// Mix Content Record
     MixContentRecord,
 
-    /// Rate Option for holding some accounts
+    /// Rate Option for holding some accounts and data
     RateOption,
 
     /// for rating other's content
@@ -46,14 +46,14 @@ impl Default for ShihonAccountType {
     }
 }
 
-/// What state a bcToken is in
+/// what state a bcToken is
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum BcTokenState {
     /// bcToken before content itself reaches to Oracle
     DraftBlankCheck,
 
-    /// some error happened when created
+    /// some error happened when put own content on Oracle
     ExecutingWithErrors,
 
     /// just for holding own content in his wallet when its content has reached to Oracle
@@ -66,7 +66,7 @@ pub enum BcTokenState {
     EnableToCandidate,
 
     /// Deadline has come for candidates
-    TanistrySetIn,
+    TanistryHasSetIn,
 
     /// enable to vote for CC because minimum number of round has done
     EnableToVoteToCC,
@@ -76,9 +76,6 @@ pub enum BcTokenState {
 
     /// already been refunded by someone
     AlreadyRefunded,
-
-    /// when holder has cancelled to turn it to private
-    Cancelled,
 }
 
 impl Default for BcTokenState {

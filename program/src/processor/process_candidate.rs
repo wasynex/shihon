@@ -9,6 +9,6 @@ use solana_program::{
 };
 use spl_governance_tools::account::create_and_serialize_account_signed;
 
-pub fn candidate(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+pub fn process_candidate(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     unimplemented!();
 }

@@ -51,7 +51,7 @@ pub fn process_instruction(
     unimplemented!();
 }
 
-/// Checks whether bcToken account can go forward to the next process.
+/// Checks whether bcToken account can go forward to the next process
 fn assert_can_go_forward_to_the_process() {
     unimplemented!();
 }

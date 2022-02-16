@@ -9,6 +9,9 @@ use solana_program::{
 };
 use spl_governance_tools::account::create_and_serialize_account_signed;
 
-pub fn create_cc_vote_record(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+pub fn process_create_cc_vote_record(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+) -> ProgramResult {
     unimplemented!();
 }

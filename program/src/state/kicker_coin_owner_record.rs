@@ -24,6 +24,9 @@ pub struct KickerCoinOwnerRecord {
     /// The account of the Coordinator, which means the person who receive KickerCoin
     pub coordinator: Pubkey,
 
+    /// amount of KickerCoin itself
+    pub amount_of_kicker_coin: u64,
+
     /// It means that this record will always be created regardless of whether it is approved by coordinator.
     /// Indicates whether the coordinator approve the KickerCoin
     pub is_kick_off: bool,
@@ -44,7 +47,7 @@ impl KickerCoinOwnerRecord {
             return Err(ShihonError::KickerCoinAlreadyKickedOff.into());
         }
 
-        if !kicker_coin_info.kicker_coin_holder {
+        if !kicker_coin_info == self.kicker_coin_holder {
             return Err(ShihonError::KickerCoinHolderMustSign.into());
         }
 

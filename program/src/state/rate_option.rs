@@ -120,12 +120,12 @@ pub fn get_signatory_record_data_for_seeds(
     get_signatory_record_data(program_id, signatory_record_info)
 }
 
-/// these funcs moved from modules/index.rs
+/// these functions moved from modules/index.rs
 fn assert_can_candidate_before_limit() -> bool {
     unimplemented!();
 }
 
-// going to move to ranistry.rs
+// going to move to tanistry.rs
 fn calculate_diversity_index_on_tanistry() -> bool {
     unimplemented!();
 }
