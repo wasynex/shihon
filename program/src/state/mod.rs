@@ -1,3 +1,5 @@
+//! Program accounts
+
 pub mod bc_token;
 pub mod bc_token_metadata;
 pub mod candidate_limit_record;

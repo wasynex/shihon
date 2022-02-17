@@ -41,9 +41,6 @@ pub struct Tanistry {
 
     /// CandidateLimitRecord List
     pub candidate_limit_record_list: Vec<Pubkey>,
-
-    /// total amount of coin
-    pub total_amount_of_coin: u64,
 }
 
 impl AccountMaxSize for Tanistry {}

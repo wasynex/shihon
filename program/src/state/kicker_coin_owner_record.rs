@@ -21,11 +21,14 @@ pub struct KickerCoinOwnerRecord {
     /// KickerCoin holder(first kicker or all Crown)
     pub kicker_coin_holder: Pubkey,
 
-    /// The account of the Coordinator, which means the person who receive KickerCoin
-    pub coordinator: Pubkey,
+    /// The account of the latest Coordinator, which means the person who receive KickerCoin before the Tanistry
+    pub latest_coordinator: Pubkey,
 
-    /// amount of KickerCoin itself
+    /// amount of KickerCoin in the round
     pub amount_of_kicker_coin: u64,
+
+    /// number of round
+    pub round: u8,
 
     /// It means that this record will always be created regardless of whether it is approved by coordinator.
     /// Indicates whether the coordinator approve the KickerCoin

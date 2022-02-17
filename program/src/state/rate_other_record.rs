@@ -19,9 +19,6 @@ use crate::state::enums::ShihonAccountType;
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct RateOtherRecord {
-    ///
-    pub is_initialized: bool,
-
     /// Rate account type
     pub account_type: ShihonAccountType,
 
@@ -71,7 +68,7 @@ impl RateOtherRecord {
 
         Ok(())
     }
-    ///
+
     /// for rating the content
     fn multi_sig_2() -> Pubkey {
         unimplemented!();

@@ -9,6 +9,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::create_and_serialize_account_signed;
 
+/// Processes Buy instruction
 pub fn process_buy_exceeded_rate_token(
     program_id: &Pubkey,
     accounts: &[AccountInfo],

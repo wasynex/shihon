@@ -9,6 +9,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::create_and_serialize_account_signed;
 
+/// Processes Approve instruction
 pub fn process_approve_kicker_coin(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
     unimplemented!();
 }
