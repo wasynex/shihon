@@ -5,15 +5,11 @@ mod process_bump_self_rate;
 mod process_buy_exceeded_rate_token;
 mod process_candidate;
 mod process_create_bc_token;
-// mod process_create_candidate_limit_record;
-// mod process_create_cc_vote_record;
-// mod process_create_outside_buyer_record;
-// mod process_create_rate_other_record;
 mod process_crowning;
+mod process_deny_kicker_coin;
+mod process_discard_bc_token;
 mod process_kick_to_coordinator;
 mod process_rate_other;
-// mod process_sell_exceeded_rate_token;
-mod process_deny_kicker_coin;
 mod process_vote_for_cc;
 
 use crate::instruction::ShihonInstruction;
@@ -23,15 +19,11 @@ use process_bump_self_rate::*;
 use process_buy_exceeded_rate_token::*;
 use process_candidate::*;
 use process_create_bc_token::*;
-// use process_create_candidate_limit_record::*;
-// use process_create_cc_vote_record::*;
-// use process_create_outside_buyer_record::*;
-// use process_create_rate_other_record::*;
 use process_crowning::*;
+use process_deny_kicker_coin::*;
+use process_discard_bc_token::*;
 use process_kick_to_coordinator::*;
 use process_rate_other::*;
-// use process_sell_exceeded_rate_token::*;
-use process_deny_kicker_coin::*;
 use process_vote_for_cc::*;
 
 use solana_program::{
