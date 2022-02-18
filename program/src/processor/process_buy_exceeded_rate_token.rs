@@ -15,4 +15,6 @@ pub fn process_buy_exceeded_rate_token(
     accounts: &[AccountInfo],
 ) -> ProgramResult {
     unimplemented!();
+    // Almost the same as methods that CandidateLimitRecord has done with by using OutsideBuyerRecord
+    // we need to set time limits for this functions in some way.
 }
