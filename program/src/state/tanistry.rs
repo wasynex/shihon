@@ -51,6 +51,11 @@ impl IsInitialized for Tanistry {
     }
 }
 
+// Tanistry itself doesn't have process function, but has some works
+// role as vast for candidate's payment
+// to shuffle the candidate list for rating
+// for circuit the MPC key to all candidate
+
 impl Tanistry {
     /// Returns Tanistry PDA seeds (All in one)
     pub fn get_tanistry_address_seeds(&self) -> Result<[&[u8]; 3], ProgramError> {
@@ -72,20 +77,27 @@ impl Tanistry {
 
         Ok(seeds)
     }
-    /// these func moved from modules/utils.rs
-    /// for on inside the Tanistry
+
+    /// make the mpc hash key for identity of Roydamna inside the Tanistry
     fn make_mpc_key(first_candidate: Pubkey, second_candidate: Pubkey) -> Pubkey {
         unimplemented!();
+        // all hash for identity like this MPC Key is on each CLR(CandidateLimitRecord), not bcToken itself
+        //
     }
 
-    fn make_building_hash() {
-        unimplemented!();
-    }
-
+    /// make (pair of candidate + first kicker) triple person
     fn make_triple(candidate_list: Vec<Pubkey>) {
         unimplemented!();
+        // The coordinator is not directly involved in the relationship of this triangle
+        // his work is only to give his input and proof of his existence to the first kicker(aka init content holder).
     }
 
+    /// shuffle the candidate
+    fn shuffle_candidate() {
+        unimplemented!();
+    }
+
+    /// getting the triple person for rating
     fn get_triple(candidate: Pubkey) {
         unimplemented!();
     }
@@ -94,7 +106,7 @@ impl Tanistry {
         unimplemented!();
     }
 
-    /// these func moved from modules/utils.rs
+    // probably this function need to create the building hash for KickerCoinOwnerRecord
     /// for pinhole address
     fn drop_address() {
         unimplemented!();
