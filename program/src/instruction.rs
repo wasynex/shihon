@@ -18,6 +18,11 @@ use solana_program::{
 #[repr(C)]
 #[allow(clippy::large_enum_variant)]
 pub enum ShihonInstruction {
+    /// Draft Blank Check
+    /// Accounts expected:
+    DraftBlankCheck {},
+
+    /// Create instruction bcToken
     ///
     /// Accounts expected:
     ///
@@ -41,6 +46,7 @@ pub enum ShihonInstruction {
 
     DiscardBcToken,
 
+    /// Kicking to coordinator instruction to next coordinator
     ///  ~ Terminate 1
     /// The first kicker decides how much KickerCoin by himself, and then throws it with own BcToken at other's BcToken to initialize (e)RFT as the tanistry ring. Note that all BcTokens here must not have been initialized to (e)RFT at any time.
     ///
@@ -53,13 +59,14 @@ pub enum ShihonInstruction {
     ///   3. `[writable]` KickerCoin Owner Record
     ///   4. `[writable]` Coordinator's bcToken account to flag as received KickerCoin from first kicker
     ///   5. `[]` Clock sysvar
-    Kicking {
+    KickingToCoordinator {
         /// this para is put as self-rating.
         coordinator: Pubkey,
         amount: u64,
     },
 
-    /// for coordinator's choice:
+    /// Coordinator received KickerCoin can choose it approve or deny
+    /// If approve it
     ///
     /// Accounts expected:
     ///
@@ -78,11 +85,12 @@ pub enum ShihonInstruction {
     /// 12. `[]` System program
     /// 13. `[]` Sysvar Rent
     /// 14. `[]` Clock sysvar
-    Approve {
+    ApproveKickerCoin {
         /// for making new RFT
         coordinator_input: String,
     },
-    /// Cancels KickerCoin by first kicker for candidate before Tanistry
+    /// Deny KickerCoin instruction
+    /// If coordinator cancels KickerCoin by first kicker for candidate before Tanistry
     ///
     /// Accounts expected:
     ///
@@ -91,10 +99,10 @@ pub enum ShihonInstruction {
     ///   2. `[signer]` Tanistry authority (Coordinator has this!)
     ///   3. `[writable]` KickerCoin Owner Record
     ///   4. `[]` Clock sysvar
-    Deny,
+    DenyKickerCoin,
 
+    /// Candidate instruction
     /// This is a parameter for the candidate. Here, BcToken can be submitted only for (e)RFT to perform the candidate.
-    ///
     /// Accounts expected:
     ///
     /// 0. `[]` Tanistry account he created bcToken belongs to
@@ -113,8 +121,8 @@ pub enum ShihonInstruction {
         coordinator: Pubkey,
         amount: u64,
     },
-    ////// Terminate 1 ~ Terminate 2 and Terminate 4 ~ Terminate 5
     ///
+    /// Terminate 1 ~ Terminate 2 and Terminate 4 ~ Terminate 5
     /// Accounts expected:
     ///
     ///
@@ -130,11 +138,12 @@ pub enum ShihonInstruction {
     /// 9. `[]` The rating program
     /// 10. `[]` System program
     /// 11. `[]` Sysvar Rent
-    Mix {
-        time_shift_a: u64,
-        time_shift_b: u64,
-    },
+    // Mix {
+    //     time_shift_a: u64,
+    //     time_shift_b: u64,
+    // },
     ///
+    /// Rate other content instruction
     /// Accounts expected:
     ///
     /// 0. `[signer]` Rater Candidate account
@@ -147,12 +156,12 @@ pub enum ShihonInstruction {
     /// 7. `[]` The rating program
     /// 8. `[]` System program
     /// 9. `[]` Sysvar Rent
-    Rate {
+    RateOtherContent {
         rating: u64,
     },
 
-    ////// Terminate 3 ~ Terminate 4
-    ///
+    /// BumpSelfRate instruction
+    /// Terminate 3 ~ Terminate 4
     /// Accounts expected:
     ///
     ///
@@ -165,28 +174,13 @@ pub enum ShihonInstruction {
     /// 6. `[]` The SPL Token program
     /// 7. `[]` System program
     /// 8. `[]` Sysvar Rent
-    Bump {
+    BumpSelfRate {
         amount: u64,
     },
 
-    //////Terminate 5 ~ Terminate 6
     ///
-    /// Accounts expected:
-    ///
-    ///
-    /// 0. `[signer]` Inside Seller account
-    /// 1. `[writable]` TokenSelloutRecord account. PDA seeds: ['tanistry',bcToken, tanistry_token_mint, tanistry_token_owner]
-    /// 2. `[writable]` The Seller's token account for selling own token as NFT
-    /// 3. `[writable]` The Buyer's token account to buy NFT of Candidate
-    /// 4. `[]` The Buyer's token account for the token they will receive refund if won the game
-    /// 5. `[Writable]` The Tanistry account holding the Tanistry info  PDA seeds: []
-    /// 6. `[signer]` bcToken authority
-    /// 7. `[]` SPL Token program
-    /// 8. `[]` System program
-    /// 9. `[]` Clock sysvar
-    /// 10. `[]` Sysvar Rent
-    Sell,
-    ///
+    /// Terminate 5 ~ Terminate 6
+    /// Buy instruction
     /// Accounts expected:
     ///
     /// 0. `[signer]` Outside Buyer account
@@ -199,13 +193,13 @@ pub enum ShihonInstruction {
     /// 7. `[]` System program
     /// 8. `[]` Clock sysvar
     /// 9. `[]` Sysvar Rent
-    Buy {
+    BuyExceededRateToken {
         token: Pubkey,
         amount: u64,
     },
 
-    ///Terminate 6 ~
-    ///
+    /// Crowing instruction
+    /// Terminate 6 ~
     /// Accounts expected:
     ///
     /// 0. `[signer]` The account of the person as Coordinator taking the Tanistry.
@@ -219,6 +213,15 @@ pub enum ShihonInstruction {
     /// 8. `[]` Sysvar Rent
     Crowning {
         crown: Pubkey,
+    },
+
+    /// CC Voting instruction
+    ///
+    /// Accounts expected:
+    ///
+    CCVote {
+        target_ring: Pubkey,
+        // config:
     },
 }
 
