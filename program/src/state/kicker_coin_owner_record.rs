@@ -30,6 +30,9 @@ pub struct KickerCoinOwnerRecord {
     /// number of round
     pub round: u8,
 
+    /// building hash key
+    pub building_hash_key: Vec<u8>,
+
     /// It means that this record will always be created regardless of whether it is approved by coordinator.
     /// Indicates whether the coordinator approve the KickerCoin
     pub is_kick_off: bool,
@@ -73,6 +76,11 @@ impl KickerCoinOwnerRecord {
 
     /// Checks Coordinator is suitable for receive the KickerCoin
     pub fn assert_can_kick_to_suitable_coordinator(&self) -> Result<(), ProgramError> {
+        unimplemented!();
+    }
+
+    /// Create the building hash for kickerCoinOwnerRecord
+    fn make_building_hash() {
         unimplemented!();
     }
 }

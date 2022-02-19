@@ -21,17 +21,11 @@ pub struct Tanistry {
     /// account type
     pub account_type: ShihonAccountType,
 
-    /// kicker key
-    pub kicker_pubkey: Pubkey,
-
     /// next tanistry id
     pub next_tanistry_id: Option<Pubkey>,
 
     /// previous tanistry id
     pub previous_tanistry_id: Option<Pubkey>,
-
-    /// building key
-    pub building_key: Vec<u8>,
 
     /// Reserved space for future versions
     pub reserved: [u8; 8],

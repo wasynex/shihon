@@ -9,7 +9,7 @@ use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
 use crate::state::enums::ShihonAccountType;
 
-/// Program metadata account. It stores information about the particular SPL-Governance program instance
+/// bcToken metadata account
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct BcTokenMetadata {
@@ -35,7 +35,7 @@ pub struct BcTokenMetadata {
     pub is_signer: bool,
 }
 
-/// The content type
+/// The content type of bcToken
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum ContentType {

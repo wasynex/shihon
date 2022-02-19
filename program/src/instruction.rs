@@ -18,9 +18,11 @@ use solana_program::{
 #[repr(C)]
 #[allow(clippy::large_enum_variant)]
 pub enum ShihonInstruction {
-    /// Draft Blank Check
+    /// Draft Blank Check instruction
+    ///
     /// Accounts expected:
-    DraftBlankCheck {},
+    ///
+    DraftBlankCheck { name: String },
 
     /// Create instruction bcToken
     ///
@@ -39,11 +41,13 @@ pub enum ShihonInstruction {
     /// 9. `[]` Sysvar Rent
     /// 10. `[]` Candidate's self-rating Coin Token Mint
     CreateBcToken {
-        name: String,
         amount: u64,
         config: BcTokenMetadata,
     },
 
+    /// Discard bcToken instruction
+    /// Accounts expected:
+    ///
     DiscardBcToken,
 
     /// Kicking to coordinator instruction to next coordinator
@@ -117,11 +121,9 @@ pub enum ShihonInstruction {
     /// 10. `[]` The PDA account
     /// 11. `[]` System program
     /// 12. `[]` Sysvar Rent
-    Candidate {
-        coordinator: Pubkey,
-        amount: u64,
-    },
-    ///
+    Candidate { coordinator: Pubkey, amount: u64 },
+
+    ///TODO: We need to put Mix instruction together with RateOtherContent instruction
     /// Terminate 1 ~ Terminate 2 and Terminate 4 ~ Terminate 5
     /// Accounts expected:
     ///
@@ -156,9 +158,7 @@ pub enum ShihonInstruction {
     /// 7. `[]` The rating program
     /// 8. `[]` System program
     /// 9. `[]` Sysvar Rent
-    RateOtherContent {
-        rating: u64,
-    },
+    RateOtherContent { rating: u64 },
 
     /// BumpSelfRate instruction
     /// Terminate 3 ~ Terminate 4
@@ -174,9 +174,7 @@ pub enum ShihonInstruction {
     /// 6. `[]` The SPL Token program
     /// 7. `[]` System program
     /// 8. `[]` Sysvar Rent
-    BumpSelfRate {
-        amount: u64,
-    },
+    BumpSelfRate { amount: u64 },
 
     ///
     /// Terminate 5 ~ Terminate 6
@@ -193,10 +191,7 @@ pub enum ShihonInstruction {
     /// 7. `[]` System program
     /// 8. `[]` Clock sysvar
     /// 9. `[]` Sysvar Rent
-    BuyExceededRateToken {
-        token: Pubkey,
-        amount: u64,
-    },
+    BuyExceededRateToken { token: Pubkey, amount: u64 },
 
     /// Crowing instruction
     /// Terminate 6 ~
@@ -211,18 +206,21 @@ pub enum ShihonInstruction {
     /// 6. `[]` The token program
     /// 7. `[]` System program
     /// 8. `[]` Sysvar Rent
-    Crowning {
-        crown: Pubkey,
-    },
+    Crowning { crown: Pubkey },
 
     /// CC Voting instruction
     ///
     /// Accounts expected:
     ///
-    CCVote {
+    VoteForCC {
         target_ring: Pubkey,
         // config:
     },
+}
+
+///TODO: we need create DraftBlankCheck instruction function here
+pub fn draft_blank_check() {
+    unimplemented!();
 }
 
 /// Create bcToken instruction
@@ -233,7 +231,6 @@ pub fn create_bc_token(
     bc_token_mint: &Pubkey,
     payer: &Pubkey,
     // Args
-    name: String,
     amount: u64,
     config: BcTokenMetadata,
 ) -> Instruction {
@@ -253,11 +250,7 @@ pub fn create_bc_token(
         AccountMeta::new_readonly(sysvar::rent::id(), false),
     ];
 
-    let instruction = ShihonInstruction::CreateBcToken {
-        name,
-        amount,
-        config,
-    };
+    let instruction = ShihonInstruction::CreateBcToken { amount, config };
 
     Instruction {
         program_id: *program_id,
@@ -267,7 +260,7 @@ pub fn create_bc_token(
 }
 
 /// kicking KickerCoin to another bcToken for making (e)RFT instruction
-pub fn kicking_coin(
+pub fn kicking_to_coordinator(
     program_id: &Pubkey,
     // Accounts
     kicker_token_mint: &Pubkey,
@@ -513,42 +506,6 @@ pub fn bump_self_rate(
     }
 }
 
-/// sell instruction
-#[allow(clippy::too_many_arguments)]
-pub fn sell_exceeded_rate_token(
-    program_id: &Pubkey,
-    // Accounts
-    seller: &Pubkey,
-    sellout_mint: &Pubkey,
-    sellout_mint_authority: &Pubkey,
-    outside_buyer_record: &Pubkey,
-    payer: &Pubkey,
-    tanistry_authority: &Pubkey,
-) -> Instruction {
-    let mint_governance_address = get_sellout_mint_address(program_id, seller, sellout_mint);
-
-    let mut accounts = vec![
-        AccountMeta::new_readonly(*seller, false),
-        AccountMeta::new(mint_governance_address, false),
-        AccountMeta::new(*sellout_mint, false),
-        AccountMeta::new_readonly(*sellout_mint_authority, true),
-        AccountMeta::new_readonly(*outside_buyer_record, false),
-        AccountMeta::new(*payer, true),
-        AccountMeta::new_readonly(spl_token::id(), false),
-        AccountMeta::new_readonly(system_program::id(), false),
-        AccountMeta::new_readonly(sysvar::rent::id(), false),
-        AccountMeta::new_readonly(sysvar::clock::id(), false),
-    ];
-
-    let instruction = ShihonInstruction::Sell;
-
-    Instruction {
-        program_id: *program_id,
-        accounts,
-        data: instruction.try_to_vec().unwrap(),
-    }
-}
-
 /// 0. `[signer]` Outside Buyer account
 /// 1. `[writable]` TokenSelloutRecord account. PDA seeds: ['tanistry',bcToken, tanistry_token_mint, tanistry_token_owner]
 /// 2. `[writable]` The Seller's token account for selling own token as NFT
@@ -628,4 +585,10 @@ pub fn crowning(
         accounts,
         data: instruction.try_to_vec().unwrap(),
     }
+}
+
+///TODO: we need to create VoteForCC instruction function here
+
+pub fn vote_for_cc() {
+    unimplemented!();
 }

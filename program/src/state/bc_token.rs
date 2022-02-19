@@ -18,16 +18,13 @@ pub struct BcToken {
     /// account type
     pub account_type: ShihonAccountType,
 
-    ///
-    pub issuer_pubkey: Pubkey,
+    /// bcToken owner pubkey
+    pub bc_token_owner_pubkey: Pubkey,
 
-    ///
+    /// amount of coin (self rating)
     pub amount_of_coin: u64,
 
-    ///
-    pub link_of_content: String,
-
-    ///
+    /// bcToken issue time
     pub issue_at: UnixTimestamp,
 
     /// Reserved space for future versions
@@ -44,9 +41,6 @@ pub struct BcToken {
 
     /// state bcToken
     pub bc_token_state: BcTokenState,
-
-    /// If candidate has this hash, we call him "Roydamna"
-    pub mpc_key: Option<u8>,
 
     /// Metadata of bcToken
     pub config: BcTokenMetadata,

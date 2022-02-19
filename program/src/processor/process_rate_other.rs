@@ -19,7 +19,7 @@ pub fn process_rate_other(program_id: &Pubkey, accounts: &[AccountInfo]) -> Prog
     // Step 2: after receive content's link from buddy candidate, put amount of rating point on buddy candidate
     // Step 3: that point need to turn the new minting RFT by first kicker and coordinator's input
 
-    // In the second rating
+    // --for the second rating--
     // the procedure is almost the same as the first rating
     // What's different is that system computes various INDEX on basis of CandidateLimitRecord and RateOtherRecord
     // If conditions are right, OutsideBuyerRecord would be issued for selling the exceeded rate token

@@ -19,7 +19,7 @@ use crate::error::ShihonError;
 
 use crate::PROGRAM_AUTHORITY_SEED;
 
-use crate::state::enums::ShihonAccountType;
+use crate::state::enums::{ShihonAccountType, VoteSource};
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct CCVoteChoice {
@@ -71,7 +71,7 @@ pub struct CCVoteRecord {
     pub voter_weight: u64,
 
     /// Voter's vote
-    pub vote: Vote,
+    pub vote: VoteSource,
 }
 
 impl AccountMaxSize for CCVoteRecord {}
