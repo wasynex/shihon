@@ -8,7 +8,11 @@ It's a new tool for finding these completely new and awesome combinations in a s
 
 ## Developer's Guide
 
-For a more detailed explanation, see [documents](https://docs.shihon.org)
+For a more detailed explanation, see
+
+- [My Dev Sketchbook](https://docs.shihon.org)
+
+- [My Hackernoon's Top Story](https://hackernoon.com/how-to-create-a-decentralized-platform-that-anonymously-publishes-content)
 
 ![](img/shihongif.gif)
 
