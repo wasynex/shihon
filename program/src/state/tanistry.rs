@@ -46,9 +46,9 @@ impl IsInitialized for Tanistry {
 }
 
 // Tanistry itself doesn't have process function, but has some works
-// role as vast for candidate's payment
-// to shuffle the candidate list for rating
-// for circuit the MPC key to all candidate
+// 1. role as a vast for candidate's payment
+// 2. to shuffle the candidate list for rating
+// 3. for circuit the MPC key to distributing to all candidates
 
 impl Tanistry {
     /// Returns Tanistry PDA seeds (All in one)

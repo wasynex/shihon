@@ -36,7 +36,7 @@ pub struct MixContentRecord {
     /// Encrypted link
     pub encrypted_link: String,
 
-    /// rater candidate (It's you!)
+    /// Rater candidate (It's you!)
     pub rater_candidate: Pubkey,
 
     /// Buddy candidate
