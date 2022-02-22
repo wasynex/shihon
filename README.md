@@ -12,6 +12,8 @@ For a more detailed explanation, see
 
 - [My Dev Sketchbook](https://docs.shihon.org)
 
+- [My HackerNoon's Top Story](https://hackernoon.com/how-to-create-a-decentralized-platform-that-anonymously-publishes-content)
+
 ![](img/shihongif.gif)
 
 
