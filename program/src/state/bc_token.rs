@@ -10,8 +10,7 @@ use solana_program::{
 };
 use spl_governance_tools::account::{assert_is_valid_account, get_account_data, AccountMaxSize};
 
-/// bcToken Account
-/// Account PDA seeds" ['shihon', name]
+/// bcToken Account PDA seeds" ['shihon', name]
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct BcToken {

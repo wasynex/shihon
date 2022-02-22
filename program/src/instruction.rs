@@ -19,7 +19,7 @@ use solana_program::{
 #[allow(clippy::large_enum_variant)]
 pub enum ShihonInstruction {
     /// Draft Blank Check instruction
-    /// Note: "bc" means Blank Check
+    /// Note: "bc" means "Blank Check"
     ///
     /// Accounts expected:
     ///
@@ -131,7 +131,6 @@ pub enum ShihonInstruction {
     /// 9. `[]` Sysvar Rent
     Candidate { coordinator: Pubkey, amount: u64 },
 
-    ///TODO: We need to put Mix instruction together with RateOtherContent instruction
     /// Terminate 1 ~ Terminate 2 and Terminate 4 ~ Terminate 5
     /// Accounts expected:
     ///
@@ -148,11 +147,11 @@ pub enum ShihonInstruction {
     /// 9. `[]` The rating program
     /// 10. `[]` System program
     /// 11. `[]` Sysvar Rent
-    // Mix {
-    //     time_shift_a: u64,
-    //     time_shift_b: u64,
-    // },
-    ///
+    MixContent {
+        time_shift_a: u64,
+        time_shift_b: u64,
+    },
+
     /// Rate other content instruction
     /// Accounts expected:
     ///
@@ -425,6 +424,49 @@ pub fn candidate(
     ];
 
     let instruction = ShihonInstruction::Candidate { amount };
+
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: instruction.try_to_vec().unwrap(),
+    }
+}
+
+///TODO: need to fix
+/// Mix content instruction
+pub fn mix_content(
+    program_id: &Pubkey,
+    // Accounts
+    rater_candidate: &Pubkey,
+    rater_token_owner: &Pubkey,
+    buddy_content_holder: &Pubkey,
+    init_content_holder: &Pubkey,
+    coordinator: &Pubkey,
+    rater_token_mint_for_rating: &Pubkey,
+    mix_content_record: &Pubkey,
+    // Args
+    amount: u64,
+) -> Instruction {
+    let rate_other_record_address = get_rate_other_record_address(
+        program_id,
+        rater_candidate,
+        rater_token_mint_for_rating,
+        init_content_holder,
+    );
+
+    let accounts = vec![
+        AccountMeta::new(*rater_candidate, true),
+        AccountMeta::new_readonly(*rater_token_owner, false),
+        AccountMeta::new(*buddy_content_holder false),
+        AccountMeta::new(*init_content_holder false),
+        AccountMeta::new_readonly(coordinator, false),
+        AccountMeta::new(*mix_content_record, false),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
+    ];
+
+    let instruction = ShihonInstruction::RateOtherContent { amount };
 
     Instruction {
         program_id: *program_id,

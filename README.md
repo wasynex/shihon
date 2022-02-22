@@ -33,13 +33,13 @@ For more Solana specifications, read
 ## Release History
 
 * 0.0.1
-    * Now under construction, See [issue Tracker](https://gitlab.com/shihonics/shihon/issues)
+    * Now under construction, See [issue Tracker](https://github.com/shihonics/shihon/issues)
 
 
 
 ---------------------
 
-_Please keep in mind this project is in under construction now, and keen to reach early alpha versions as soon as possible. Please post any issue to the [Issue Tracker](https://gitlab.com/shihonics/shihon/-/issues). If you have any ideas and fixes do not hesitate to [merge request](https://gitlab.com/shihonics/shihon/-/merge_requests)_
+_Please keep in mind this project is in under construction now, and keen to reach early alpha versions as soon as possible. Please post any issue to the [Issue Tracker](https://github.com/shihonics/shihon/-/issues). If you have any ideas and fixes do not hesitate to [merge request](https://github.com/shihonics/shihon/-/merge_requests)_
 
 
 ## License

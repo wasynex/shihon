@@ -10,6 +10,7 @@ mod process_deny_kicker_coin;
 mod process_discard_bc_token;
 mod process_draft_blank_check;
 mod process_kick_to_coordinator;
+mod process_mix_content;
 mod process_rate_other;
 mod process_vote_for_cc;
 
@@ -25,6 +26,7 @@ use process_deny_kicker_coin::*;
 use process_discard_bc_token::*;
 use process_draft_blank_check::*;
 use process_kick_to_coordinator::*;
+use process_mix_content::*;
 use process_rate_other::*;
 use process_vote_for_cc::*;
 
