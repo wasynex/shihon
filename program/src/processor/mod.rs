@@ -46,7 +46,42 @@ pub fn process_instruction(
     let instruction: ShihonInstruction =
         try_from_slice_unchecked(input).map_err(|_| ProgramError::InvalidInstructionData)?;
 
-    unimplemented!();
+    ShihonInstruction::DraftBlankCheck { name } => process_draft_blank_check(program_id, accounts),
+
+    ShihonInstruction::CreateBcToken {
+        amount,
+        config
+    } => process_create_bc_token(program_id, accounts),
+
+    ShihonInstruction::DiscardBcToken {} => process_discard_bc_token(program_id, accounts),
+
+    ShihonInstruction::KickingToCoordinator { coordinator, amount } => process_kick_to_coordinator(program_id, accounts),
+
+    ShihonInstruction::ApproveKickerCoin {
+        coordinator_input
+    } => process_approve_kicker_coin(program_id, accounts),
+
+    ShihonInstruction::DenyKickerCoin {} => process_deny_kicker_coin(program_id, accounts),
+
+    ShihonInstruction::Candidate { coordinator, amount }, {} => process_candidate(program_id, accounts),
+
+    ShihonInstruction::MixContent {
+        time_shift_a,
+        time_shift_b,
+    } => process_mix_content(program_id, accounts),
+
+    ShihonInstruction::RateOtherContent { rating } => process_rate_other(program_id, accounts),
+
+    ShihonInstruction::BumpSelfRate { amount } => process_bump_self_rate(program_id, accounts),
+
+    ShihonInstruction::BuyExceededRateToken { token, amount } => process_buy_exceeded_rate_token(program_id, accounts),
+
+    ShihonInstruction::Crowning { crown } => process_crowning(program_id, accounts),
+
+    ShihonInstruction::VoteForCC {
+        target_ring
+    } => process_vote_for_cc(program_id, accounts),
+
 }
 
 /// Checks whether bcToken account can go forward to the next process
