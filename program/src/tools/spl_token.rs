@@ -18,7 +18,7 @@ use spl_token::{
     state::{Account, Mint},
 };
 
-use crate::{error::GovernanceError, tools::pack::unpack_coption_pubkey};
+use crate::{error::ShihonError, tools::pack::unpack_coption_pubkey};
 
 /// Creates and initializes SPL token account with PDA using the provided PDA seeds
 #[allow(clippy::too_many_arguments)]
@@ -173,15 +173,15 @@ pub fn transfer_spl_tokens_signed<'a>(
 /// Asserts the given account_info represents a valid SPL Token account which is initialized and belongs to spl_token program
 pub fn assert_is_valid_spl_token_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
     if account_info.data_is_empty() {
-        return Err(GovernanceError::SplTokenAccountDoesNotExist.into());
+        return Err(ShihonError::SplTokenAccountDoesNotExist.into());
     }
 
     if account_info.owner != &spl_token::id() {
-        return Err(GovernanceError::SplTokenAccountWithInvalidOwner.into());
+        return Err(ShihonError::SplTokenAccountWithInvalidOwner.into());
     }
 
     if account_info.data_len() != Account::LEN {
-        return Err(GovernanceError::SplTokenInvalidTokenAccountData.into());
+        return Err(ShihonError::SplTokenInvalidTokenAccountData.into());
     }
 
     // TokeAccount layout:   mint(32), owner(32), amount(8), delegate(36), state(1), ...
@@ -189,7 +189,7 @@ pub fn assert_is_valid_spl_token_account(account_info: &AccountInfo) -> Result<(
     let state = array_ref![data, 108, 1];
 
     if state == &[0] {
-        return Err(GovernanceError::SplTokenAccountNotInitialized.into());
+        return Err(ShihonError::SplTokenAccountNotInitialized.into());
     }
 
     Ok(())
@@ -198,15 +198,15 @@ pub fn assert_is_valid_spl_token_account(account_info: &AccountInfo) -> Result<(
 /// Asserts the given mint_info represents a valid SPL Token Mint account  which is initialized and belongs to spl_token program
 pub fn assert_is_valid_spl_token_mint(mint_info: &AccountInfo) -> Result<(), ProgramError> {
     if mint_info.data_is_empty() {
-        return Err(GovernanceError::SplTokenMintDoesNotExist.into());
+        return Err(ShihonError::SplTokenMintDoesNotExist.into());
     }
 
     if mint_info.owner != &spl_token::id() {
-        return Err(GovernanceError::SplTokenMintWithInvalidOwner.into());
+        return Err(ShihonError::SplTokenMintWithInvalidOwner.into());
     }
 
     if mint_info.data_len() != Mint::LEN {
-        return Err(GovernanceError::SplTokenInvalidMintAccountData.into());
+        return Err(ShihonError::SplTokenInvalidMintAccountData.into());
     }
 
     // In token program [36, 8, 1, is_initialized(1), 36] is the layout
@@ -214,7 +214,7 @@ pub fn assert_is_valid_spl_token_mint(mint_info: &AccountInfo) -> Result<(), Pro
     let is_initialized = array_ref![data, 45, 1];
 
     if is_initialized == &[0] {
-        return Err(GovernanceError::SplTokenMintNotInitialized.into());
+        return Err(ShihonError::SplTokenMintNotInitialized.into());
     }
 
     Ok(())
@@ -273,15 +273,15 @@ pub fn assert_spl_token_mint_authority_is_signer(
     let mint_authority = get_spl_token_mint_authority(mint_info)?;
 
     if mint_authority.is_none() {
-        return Err(GovernanceError::MintHasNoAuthority.into());
+        return Err(ShihonError::MintHasNoAuthority.into());
     }
 
     if !mint_authority.contains(mint_authority_info.key) {
-        return Err(GovernanceError::InvalidMintAuthority.into());
+        return Err(ShihonError::InvalidMintAuthority.into());
     }
 
     if !mint_authority_info.is_signer {
-        return Err(GovernanceError::MintAuthorityMustSign.into());
+        return Err(ShihonError::MintAuthorityMustSign.into());
     }
 
     Ok(())
@@ -295,11 +295,11 @@ pub fn assert_spl_token_owner_is_signer(
     let token_owner = get_spl_token_owner(token_info)?;
 
     if token_owner != *token_owner_info.key {
-        return Err(GovernanceError::InvalidTokenOwner.into());
+        return Err(ShihonError::InvalidTokenOwner.into());
     }
 
     if !token_owner_info.is_signer {
-        return Err(GovernanceError::TokenOwnerMustSign.into());
+        return Err(ShihonError::TokenOwnerMustSign.into());
     }
 
     Ok(())
