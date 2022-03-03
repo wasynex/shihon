@@ -30,17 +30,6 @@ pub struct CCVoteChoice {
     pub target_ring: Option<Pubkey>,
 }
 
-// impl CCVoteChoice {
-//     /// Returns the choice weight given the voter's weight
-//     pub fn get_choice_weight(&self, voter_weight: u64) -> Result<u64, ProgramError> {
-//         Ok(match self.weight_percentage {
-//             100 => voter_weight,
-//             0 => 0,
-//             _ => return Err(ShihonError::InvalidVoteChoiceWeightPercentage.into()),
-//         })
-//     }
-// }
-
 /// User's vote
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum Vote {
@@ -81,14 +70,24 @@ impl IsInitialized for CCVoteRecord {
         self.account_type == ShihonAccountType::CCVoteRecord
     }
 }
+
 impl CCVoteRecord {
-    /// Checks the vote can be relinquished
-    pub fn assert_can_relinquish_vote(&self) -> Result<(), ProgramError> {
+    /// Checks can vating for other ring
+    pub fn assert_can_vote(&self) -> Result<(), ProgramError> {
         if self.is_relinquished {
             return Err(ShihonError::VoteAlreadyRelinquished.into());
         }
 
         Ok(())
+    }
+
+    pub fn assert_can_reach_to_cc() {
+        unimplemented!();
+    }
+
+    pub fn count_the_voting() {
+        unimplemented!();
+        // see the limit bar
     }
 
     ///TODO: What function should be created to count here?

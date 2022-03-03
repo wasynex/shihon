@@ -71,15 +71,26 @@ impl IsInitialized for MixContentRecord {
 }
 
 impl MixContentRecord {
+    pub fn assert_finished_shaffle_on_candidate_list() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_triangle_person() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_mix_the_content() {
+        unimplemented!();
+    }
+
     /// mixing the content for first step
     fn multi_sig_1() {
         unimplemented!();
     }
 }
 
-///TODO: need to fix and rename from here
-/// Deserializes Proposal and validates it belongs to the given Governance and Governing Mint
-pub fn get_proposal_data_for_governance_and_governing_mint(
+/// Deserializes Proposal and validates it belongs to the given content
+pub fn get_content_metadata_for_mixing(
     program_id: &Pubkey,
     proposal_info: &AccountInfo,
     governance: &Pubkey,
@@ -94,8 +105,8 @@ pub fn get_proposal_data_for_governance_and_governing_mint(
     Ok(proposal_data)
 }
 
-/// Deserializes Proposal and validates it belongs to the given Governance
-pub fn get_proposal_data_for_governance(
+/// Deserializes rate option and validates it belongs to the given two content
+pub fn get_content_metadata_for_rating(
     program_id: &Pubkey,
     proposal_info: &AccountInfo,
     governance: &Pubkey,
@@ -109,8 +120,8 @@ pub fn get_proposal_data_for_governance(
     Ok(proposal_data)
 }
 
-/// Returns Rate PDA seeds
-pub fn get_proposal_address_seeds<'a>(
+/// Returns Rate Option PDA seeds
+pub fn get_rate_option_address_seeds<'a>(
     governance: &'a Pubkey,
     governing_token_mint: &'a Pubkey,
     proposal_index_le_bytes: &'a [u8],
@@ -123,8 +134,8 @@ pub fn get_proposal_address_seeds<'a>(
     ]
 }
 
-/// Returns Proposal PDA address
-pub fn get_proposal_address<'a>(
+/// Returns rate option PDA address
+pub fn get_rate_option_address<'a>(
     program_id: &Pubkey,
     governance: &'a Pubkey,
     governing_token_mint: &'a Pubkey,
@@ -137,11 +148,8 @@ pub fn get_proposal_address<'a>(
     .0
 }
 
-/// Assert options to create proposal are valid for the Proposal vote_type
-pub fn assert_valid_proposal_options(
-    options: &[String],
-    vote_type: &R,
-) -> Result<(), ProgramError> {
+/// Assert can create rate options for holding some key
+pub fn assert_valid_rate_options(options: &[String], vote_type: &R) -> Result<(), ProgramError> {
     if options.is_empty() {
         return Err(ShihonError::InvalidProposalOptions.into());
     }

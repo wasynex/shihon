@@ -99,20 +99,6 @@ impl Tanistry {
     fn get_my_buddy_candidate(me: Pubkey) -> Pubkey {
         unimplemented!();
     }
-
-    // probably this function need to create the building hash for KickerCoinOwnerRecord
-    /// for pinhole address
-    fn drop_address() {
-        unimplemented!();
-    }
-    /// for pinhole address
-    fn pull_address() {
-        unimplemented!();
-    }
-    /// getting opposite address(wallet)
-    fn get_opposite_address(me: Pubkey) -> Pubkey {
-        unimplemented!();
-    }
 }
 
 /// Deserializes Tanistry account and checks owner program

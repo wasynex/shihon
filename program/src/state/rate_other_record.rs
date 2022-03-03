@@ -69,12 +69,15 @@ impl RateOtherRecord {
         Ok(())
     }
 
-    /// for rating the content
-    fn multi_sig_2() -> Pubkey {
+    pub fn assert_can_how_size_rating_point() {
         unimplemented!();
     }
-    /// for rating the content
-    fn multi_sig_3() -> Pubkey {
+
+    pub fn assert_is_valid_rating_over_zero_amount() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_mint_rft_as_rating_token() {
         unimplemented!();
     }
 }

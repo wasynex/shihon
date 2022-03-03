@@ -90,7 +90,7 @@ impl BcToken {
     }
 
     /// Asserts the given bcToken can be deposited into the Tanistry
-    pub fn asset_bc_tokens_deposits_allowed(
+    pub fn asset_can_deposits_on_bc_token(
         &self,
         bc_token_mint: &Pubkey,
     ) -> Result<(), ProgramError> {
@@ -102,6 +102,21 @@ impl BcToken {
 
         Ok(())
     }
+
+    pub fn assert_can_be_kicker() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_candidate() {
+        unimplemented!();
+    }
+
+    // which state of bcToken now?
+}
+
+/// get self rating
+pub fn get_self_rate_value() -> u64 {
+    unimplemented!();
 }
 
 /// Checks whether bcToken account exists, is initialized

@@ -39,11 +39,14 @@ pub struct BcTokenMetadata {
 #[repr(C)]
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum ContentType {
-    ///
+    /// order content mix type
     Ordinary,
 
-    ///
+    /// partial content mix type
     Partially,
+
+    /// other content mix type
+    Other,
 }
 
 impl AccountMaxSize for BcTokenMetadata {
@@ -58,6 +61,39 @@ impl IsInitialized for BcTokenMetadata {
     }
 }
 
+impl BcTokenMetadata {
+    pub fn assert_can_poking_content() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_content_type_matched() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_received_link_from_oracle() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_hold_content_data_in_bc_token() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_correct_owner() {
+        unimplemented!();
+    }
+
+    pub fn get_which_content_version() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_public() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_reach_each_content_on_oracle() {
+        unimplemented!();
+    }
+}
 
 /// Returns bcToken Metadata PDA address
 pub fn get_bc_token_metadata_address(program_id: &Pubkey) -> Pubkey {

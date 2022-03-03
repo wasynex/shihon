@@ -47,6 +47,22 @@ impl IsInitialized for KickerCoinOwnerRecord {
 }
 
 impl KickerCoinOwnerRecord {
+    pub fn assert_is_valid_first_kicker() {
+        unimplemented!();
+    }
+
+    pub fn assert_is_valid_crown() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_blood_on_crown() {
+        unimplemented!();
+    }
+
+    pub fn assert_can_blooded() -> bool {
+        unimplemented!();
+    }
+
     /// Checks KickerCoin hasn't kicked off yet and is transaction by KickerCoin holder
     pub fn assert_can_kick_off(&self, kicker_coin_info: &AccountInfo) -> Result<(), ProgramError> {
         if self.is_kick_off {
@@ -81,6 +97,19 @@ impl KickerCoinOwnerRecord {
 
     /// Create the building hash for kickerCoinOwnerRecord
     fn make_building_hash() {
+        unimplemented!();
+    }
+
+    /// for pinhole address
+    fn drop_address() {
+        unimplemented!();
+    }
+    /// for pinhole address
+    fn pull_address() {
+        unimplemented!();
+    }
+    /// getting opposite address(wallet)
+    fn get_opposite_address(me: Pubkey) -> Pubkey {
         unimplemented!();
     }
 }

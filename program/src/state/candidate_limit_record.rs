@@ -76,7 +76,7 @@ impl CandidateLimitRecord {
         Err(ShihonError::CandidateTokenOwnerMustSign.into())
     }
 
-    /// TODO: we need to write the Limit Bar's code here.
+    /// TODO: we need to write the Limit Bar's code here.(mean that can candidate?)
     /// Asserts TokenOwner has enough tokens to be allowed to candidate
     pub fn assert_can_create_candidate_limit_record(
         &self,
@@ -106,12 +106,17 @@ impl CandidateLimitRecord {
         Ok(())
     }
 
-    /// these funcs moved from modules/index.rs
+    /// this function use within above function
     fn get_candidate_limit_bar() -> bool {
         unimplemented!();
     }
 
-    /// and here.
+    /// can create mpc hash on tanistry
+    pub fn assert_can_create_mpc_hash() {
+        unimplemented!();
+    }
+
+    //TODO: need to fix here.
     /// Asserts TokenOwner has enough tokens to be allowed to create governance
     pub fn assert_can_create_governance(
         &self,
@@ -139,39 +144,6 @@ impl CandidateLimitRecord {
     pub fn increase_number_of_candidate_count(&self) {
         if self.number_of_candidate_count != 0 {
             self.number_of_candidate_count = self.number_of_candidate_count.checked_sub(1).unwrap();
-        }
-    }
-
-    /// no need func now
-    pub fn resolve_voter_weight(
-        &self,
-        program_id: &Pubkey,
-        account_info_iter: &mut Iter<AccountInfo>,
-        realm: &Pubkey,
-        realm_data: &Realm,
-        weight_action: VoterWeightAction,
-        weight_action_target: &Pubkey,
-    ) -> Result<u64, ProgramError> {
-        // if the realm uses addin for community voter weight then use the externally provided weight
-        if realm_data.config.use_community_voter_weight_addin
-            && realm_data.community_mint == self.governing_token_mint
-        {
-            let realm_config_info = next_account_info(account_info_iter)?;
-            let voter_weight_record_info = next_account_info(account_info_iter)?;
-
-            let realm_config_data =
-                get_realm_config_data_for_realm(program_id, realm_config_info, realm)?;
-
-            let voter_weight_record_data = get_voter_weight_record_data_for_token_owner_record(
-                &realm_config_data.community_voter_weight_addin.unwrap(),
-                voter_weight_record_info,
-                self,
-            )?;
-            voter_weight_record_data
-                .assert_is_valid_voter_weight(weight_action, weight_action_target)?;
-            Ok(voter_weight_record_data.voter_weight)
-        } else {
-            Ok(self.governing_token_deposit_amount)
         }
     }
 }

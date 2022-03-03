@@ -36,7 +36,6 @@ pub struct OutsideBuyerRecord {
     /// Buyer Token Mint the OutsideBuyerRecord holds deposit for
     pub outside_buyer_token_mint: Pubkey,
 
-    /// The owner (either single or multisig) of the deposited governing SPL Tokens
     /// This is who can authorize a withdrawal of the tokens
     pub outside_buyer_token_owner: Pubkey,
 
@@ -61,6 +60,11 @@ impl IsInitialized for OutsideBuyerRecord {
 ///TODO: not yet fix this associated functions
 /// I need pull the data from RateOption for making these functions
 impl OutsideBuyerRecord {
+    /// Checks whether create OutsideBuyerRecord
+    pub fn assert_can_create_outside_buyer_record() {
+        unimplemented!();
+    }
+
     /// Checks whether the provided exceeded rating token Authority signed transaction
     pub fn assert_outside_buyer_token_owner(
         &self,
@@ -143,37 +147,12 @@ impl OutsideBuyerRecord {
         Ok(())
     }
 
-    /// Resolves voter's weight using either the amount deposited into the realm or weight provided by voter weight addin (if configured)
-    pub fn resolve_voter_weight(
-        &self,
-        program_id: &Pubkey,
-        account_info_iter: &mut Iter<AccountInfo>,
-        realm: &Pubkey,
-        realm_data: &Realm,
-        weight_action: VoterWeightAction,
-        weight_action_target: &Pubkey,
-    ) -> Result<u64, ProgramError> {
-        // if the realm uses addin for community voter weight then use the externally provided weight
-        if realm_data.config.use_community_voter_weight_addin
-            && realm_data.community_mint == self.governing_token_mint
-        {
-            let realm_config_info = next_account_info(account_info_iter)?;
-            let voter_weight_record_info = next_account_info(account_info_iter)?;
+    fn get_enable_sellout_value() -> u64 {
+        unimplemented!();
+    }
 
-            let realm_config_data =
-                get_realm_config_data_for_realm(program_id, realm_config_info, realm)?;
-
-            let voter_weight_record_data = get_voter_weight_record_data_for_token_owner_record(
-                &realm_config_data.community_voter_weight_addin.unwrap(),
-                voter_weight_record_info,
-                self,
-            )?;
-            voter_weight_record_data
-                .assert_is_valid_voter_weight(weight_action, weight_action_target)?;
-            Ok(voter_weight_record_data.voter_weight)
-        } else {
-            Ok(self.governing_token_deposit_amount)
-        }
+    fn get_already_sold_out_value() -> u64 {
+        unimplemented!();
     }
 }
 
@@ -283,18 +262,4 @@ pub fn get_outside_buyer_token_owner_record_data_for_content_owner(
     }
 
     get_outside_buyer_token_owner_record_data(program_id, outside_buyer_token_owner_record_info)
-}
-
-
-/// these func moved from modules/value.rs
-fn get_self_rate_value() -> u64 {
-    unimplemented!();
-}
-
-fn get_enable_sellout_value() -> u64 {
-    unimplemented!();
-}
-
-fn get_already_sold_out_value() -> u64 {
-    unimplemented!();
 }
