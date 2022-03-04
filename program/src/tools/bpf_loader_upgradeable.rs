@@ -10,7 +10,7 @@ use solana_program::{
 
 use bincode::deserialize;
 
-use crate::error::GovernanceError;
+use crate::error::ShihonError;
 
 /// Returns ProgramData account address for the given Program
 pub fn get_program_data_address(program: &Pubkey) -> Pubkey {
@@ -69,27 +69,27 @@ pub fn assert_program_upgrade_authority_is_signer(
     let program_data_address = get_program_data_address(program_address);
 
     if program_data_address != *program_data_info.key {
-        return Err(GovernanceError::InvalidProgramDataAccountAddress.into());
+        return Err(ShihonError::InvalidProgramDataAccountAddress.into());
     }
 
     let upgrade_authority = if let UpgradeableLoaderState::ProgramData {
         slot: _,
         upgrade_authority_address,
     } = deserialize(&program_data_info.data.borrow())
-        .map_err(|_| GovernanceError::InvalidProgramDataAccountData)?
+        .map_err(|_| ShihonError::InvalidProgramDataAccountData)?
     {
         upgrade_authority_address
     } else {
         None
     };
 
-    let upgrade_authority = upgrade_authority.ok_or(GovernanceError::ProgramNotUpgradable)?;
+    let upgrade_authority = upgrade_authority.ok_or(ShihonError::ProgramNotUpgradable)?;
 
     if upgrade_authority != *program_upgrade_authority_info.key {
-        return Err(GovernanceError::InvalidUpgradeAuthority.into());
+        return Err(ShihonError::InvalidUpgradeAuthority.into());
     }
     if !program_upgrade_authority_info.is_signer {
-        return Err(GovernanceError::UpgradeAuthorityMustSign.into());
+        return Err(ShihonError::UpgradeAuthorityMustSign.into());
     }
 
     Ok(())
