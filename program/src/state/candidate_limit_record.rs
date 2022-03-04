@@ -2,17 +2,7 @@
 
 use std::slice::Iter;
 
-use crate::{
-    addins::voter_weight::{
-        get_voter_weight_record_data_for_token_owner_record, VoterWeightAction,
-    },
-    error::ShihonError,
-    state::{
-        enums::ShihonAccountType, governance::GovernanceConfig, realm::Realm,
-        realm_config::get_realm_config_data_for_realm,
-    },
-    PROGRAM_AUTHORITY_SEED,
-};
+use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{

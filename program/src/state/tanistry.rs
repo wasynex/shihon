@@ -1,9 +1,6 @@
 //! Tanistry Account
 
-use crate::{
-    error::ShihonError,
-    state::enums::{ShihonAccountType, VoteThresholdPercentage, VoteWeightSource},
-};
+use crate::{error::ShihonError, state::enums::ShihonAccountType};
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use solana_program::{
     account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,

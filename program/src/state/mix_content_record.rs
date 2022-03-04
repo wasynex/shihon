@@ -12,20 +12,8 @@ use solana_program::{
 };
 use spl_governance_tools::account::{get_account_data, AccountMaxSize};
 
-use crate::{
-    error::ShihonError,
-    state::{
-        enums::{
-            InstructionExecutionFlags, InstructionExecutionStatus, MintMaxVoteWeightSource,
-            ProposalState, ShihonAccountType, VoteThresholdPercentage,
-        },
-        governance::GovernanceConfig,
-        proposal_instruction::ProposalInstructionV2,
-        realm::Realm,
-        vote_record::Vote,
-    },
-    PROGRAM_AUTHORITY_SEED,
-};
+use crate::{error::ShihonError, state::enums::ShihonAccountType, PROGRAM_AUTHORITY_SEED};
+
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
